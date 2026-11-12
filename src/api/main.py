@@ -7,6 +7,7 @@ Mirror Finder, window sensitivity analysis, gridded Zarr data, and export.
 
 from __future__ import annotations
 
+import functools
 import io
 import json
 import os
@@ -115,43 +116,20 @@ def list_variables() -> Dict[str, Any]:
     return VARIABLE_INFO
 
 
-@app.get("/trend", response_model=TrendResult)
-def get_trend(
-    district: str = Query("Rajshahi", description="District name in Bangladesh"),
-    variable: str = Query("T2M", description="Variable (T2M, PRECTOTCORR, ALLSKY_SFC_SW_DWN)"),
-    start: Optional[str] = Query("2001-01-01", description="Start date (YYYY-MM-DD)"),
-    end: Optional[str] = Query("2025-12-31", description="End date (YYYY-MM-DD)"),
-    include_series: bool = Query(True, description="Whether to include time series points for charting"),
+@functools.lru_cache(maxsize=512)
+def _compute_trend_cached(
+    district_name: str,
+    var_key: str,
+    start: Optional[str],
+    end: Optional[str],
+    include_series: bool,
 ) -> TrendResult:
-    """
-    Compute or retrieve Mann-Kendall and Theil-Sen trend result for a district and variable.
-    Strictly deterministic; no network access during evaluation.
-    """
-    try:
-        meta = get_district_metadata(district)
-    except KeyError:
-        raise HTTPException(status_code=404, detail=f"District '{district}' not recognized.")
-
-    district_name = meta["name"]
-    var_upper = variable.strip().upper()
-    if var_upper not in VARIABLE_INFO and variable not in VARIABLE_INFO:
-        raise HTTPException(status_code=400, detail=f"Variable '{variable}' not supported.")
-
-    var_key = var_upper if var_upper in VARIABLE_INFO else variable
-
-    # Handle internal function calls where parameters might default to Query instances
-    if not isinstance(start, str):
-        start = "2001-01-01" if start is None or not hasattr(start, "default") else start.default
-    if not isinstance(end, str):
-        end = "2025-12-31" if end is None or not hasattr(end, "default") else end.default
-    if not isinstance(include_series, bool):
-        include_series = True if not hasattr(include_series, "default") else bool(include_series.default)
-
+    """Internal cached engine for Mann-Kendall and Theil-Sen trend calculation."""
     is_benchmark_query = (
         district_name.lower() == "rajshahi"
         and var_key == "T2M"
-        and (start == "2001-01-01")
-        and (end == "2025-12-31")
+        and (start == "2001-01-01" or start is None)
+        and (end == "2025-12-31" or end is None)
     )
 
     df, mode = load_district_power_df(district_name)
@@ -291,24 +269,49 @@ def get_trend(
     )
 
 
-@app.get("/forecast", response_model=ForecastResult)
-def get_ml_forecast(
-    district: str = Query("Rajshahi"),
-    variable: str = Query("T2M"),
-    horizon_months: int = Query(36, ge=12, le=60, description="Forecast horizon in months"),
-) -> ForecastResult:
+@app.get("/trend", response_model=TrendResult)
+def get_trend(
+    district: str = Query("Rajshahi", description="District name in Bangladesh"),
+    variable: str = Query("T2M", description="Variable (T2M, PRECTOTCORR, ALLSKY_SFC_SW_DWN)"),
+    start: Optional[str] = Query("2001-01-01", description="Start date (YYYY-MM-DD)"),
+    end: Optional[str] = Query("2025-12-31", description="End date (YYYY-MM-DD)"),
+    include_series: bool = Query(True, description="Whether to include time series points for charting"),
+) -> TrendResult:
     """
-    ML Forecasting component (Section 6.3 & 10 of project doc).
-    Uses Ridge regression with harmonic seasonal & autoregressive lag features,
-    time-ordered 80/20 train/test split, comparison against naive seasonal persistence,
-    and 95% prediction intervals.
+    Compute or retrieve Mann-Kendall and Theil-Sen trend result for a district and variable.
+    Strictly deterministic; no network access during evaluation. Results are cached in memory for sub-millisecond response.
     """
-    meta = get_district_metadata(district)
-    district_name = meta["name"]
-    var_key = variable.strip().upper()
-    if var_key not in VARIABLE_INFO:
-        var_key = variable
+    try:
+        meta = get_district_metadata(district)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"District '{district}' not recognized.")
 
+    district_name = meta["name"]
+    var_upper = variable.strip().upper()
+    if var_upper not in VARIABLE_INFO and variable not in VARIABLE_INFO:
+        raise HTTPException(status_code=400, detail=f"Variable '{variable}' not supported.")
+
+    var_key = var_upper if var_upper in VARIABLE_INFO else variable
+
+    # Handle internal function calls where parameters might default to Query instances
+    if not isinstance(start, str):
+        start = "2001-01-01" if start is None or not hasattr(start, "default") else start.default
+    if not isinstance(end, str):
+        end = "2025-12-31" if end is None or not hasattr(end, "default") else end.default
+    if not isinstance(include_series, bool):
+        include_series = True if not hasattr(include_series, "default") else bool(include_series.default)
+
+    return _compute_trend_cached(
+        district_name=district_name,
+        var_key=var_key,
+        start=start,
+        end=end,
+        include_series=include_series,
+    )
+
+
+@functools.lru_cache(maxsize=256)
+def _compute_forecast_cached(district_name: str, var_key: str, horizon_months: int) -> ForecastResult:
     df, _ = load_district_power_df(district_name)
     df_monthly = (
         df.set_index("date")
@@ -339,19 +342,31 @@ def get_ml_forecast(
     )
 
 
-@app.get("/mirror-finder", response_model=MirrorFinderResult)
-def find_mirror_district(
+@app.get("/forecast", response_model=ForecastResult)
+def get_ml_forecast(
     district: str = Query("Rajshahi"),
     variable: str = Query("T2M"),
-) -> MirrorFinderResult:
+    horizon_months: int = Query(36, ge=12, le=60, description="Forecast horizon in months"),
+) -> ForecastResult:
     """
-    Mirror Finder / Opposite-Trend Detector (Section 6.5, 9, 11 of doc).
-    Finds the district with maximum divergence or opposite directional trend
-    in Bangladesh compared to the target district.
+    ML Forecasting component (Section 6.3 & 10 of project doc).
+    Uses Ridge regression with harmonic seasonal & autoregressive lag features,
+    time-ordered 80/20 train/test split, comparison against naive seasonal persistence,
+    and 95% prediction intervals.
     """
-    target_res = get_trend(district=district, variable=variable, include_series=False)
+    meta = get_district_metadata(district)
+    district_name = meta["name"]
+    var_key = variable.strip().upper()
+    if var_key not in VARIABLE_INFO:
+        var_key = variable
+
+    return _compute_forecast_cached(district_name, var_key, horizon_months)
+
+
+@functools.lru_cache(maxsize=256)
+def _compute_mirror_cached(district_name: str, var_key: str) -> MirrorFinderResult:
+    target_res = get_trend(district=district_name, variable=var_key, include_series=False)
     target_slope = target_res.slope.slope_per_year
-    var_key = target_res.variable
 
     max_delta = -1.0
     mirror_name = None
@@ -360,7 +375,7 @@ def find_mirror_district(
 
     # Fast evaluation on monthly means across all districts (sub-second)
     for name in DISTRICTS_METADATA.keys():
-        if name.lower() == district.lower():
+        if name.lower() == district_name.lower():
             continue
         try:
             df, _ = load_district_power_df(name)
@@ -381,7 +396,7 @@ def find_mirror_district(
 
     divergence = round(abs(target_slope - mirror_slope_val), 4)
     explanation = (
-        f"{mirror_name} exhibits the highest divergence from {target_res.district} in {variable}. "
+        f"{mirror_name} exhibits the highest divergence from {target_res.district} in {var_key}. "
         f"While {target_res.district} trends at {target_slope} {target_res.slope.units}, "
         f"{mirror_name} records {mirror_slope_val} {target_res.slope.units} (divergence delta: {divergence})."
     )
@@ -389,12 +404,45 @@ def find_mirror_district(
     return MirrorFinderResult(
         target_district=target_res.district,
         mirror_district=mirror_name,
-        variable=variable,
+        variable=var_key,
         target_slope=target_slope,
         mirror_slope=mirror_slope_val,
         divergence_delta=divergence,
         mirror_direction=mirror_dir,
         explanation=explanation,
+    )
+
+
+@app.get("/mirror-finder", response_model=MirrorFinderResult)
+def find_mirror_district(
+    district: str = Query("Rajshahi"),
+    variable: str = Query("T2M"),
+) -> MirrorFinderResult:
+    """
+    Mirror Finder / Opposite-Trend Detector (Section 6.5, 9, 11 of doc).
+    Finds the district with maximum divergence or opposite directional trend
+    in Bangladesh compared to the target district.
+    """
+    meta = get_district_metadata(district)
+    district_name = meta["name"]
+    var_key = variable.strip().upper()
+    if var_key not in VARIABLE_INFO:
+        var_key = variable
+
+    return _compute_mirror_cached(district_name, var_key)
+
+
+@functools.lru_cache(maxsize=256)
+def _compute_sensitivity_cached(district_name: str, var_key: str) -> SensitivityResult:
+    df, _ = load_district_power_df(district_name)
+    units = VARIABLE_UNITS.get(var_key, "units per year")
+    sens_windows = compute_window_sensitivity(df[var_key], df["date"], is_daily=True, units=units)
+
+    return SensitivityResult(
+        district=district_name,
+        variable=var_key,
+        units=units,
+        windows=sens_windows,
     )
 
 
@@ -413,33 +461,11 @@ def window_sensitivity_analysis(
     if var_key not in VARIABLE_INFO:
         var_key = variable
 
-    df, _ = load_district_power_df(district_name)
-    units = VARIABLE_UNITS.get(var_key, "units per year")
-
-    sens_windows = compute_window_sensitivity(df[var_key], df["date"], is_daily=True, units=units)
-
-    return SensitivityResult(
-        district=district_name,
-        variable=var_key,
-        units=units,
-        windows=sens_windows,
-    )
+    return _compute_sensitivity_cached(district_name, var_key)
 
 
-@app.get("/map/fdr")
-def get_map_fdr_summary(
-    variable: str = Query("T2M"),
-    start: Optional[str] = Query("2001-01-01"),
-    end: Optional[str] = Query("2025-12-31"),
-) -> List[Dict[str, Any]]:
-    """
-    Compute Mann-Kendall trends for all 64 districts in Bangladesh simultaneously
-    and apply Benjamini-Hochberg False Discovery Rate (FDR) multiple testing correction (Section 6.3).
-    """
-    var_key = variable.strip().upper()
-    if var_key not in VARIABLE_INFO:
-        var_key = variable
-
+@functools.lru_cache(maxsize=32)
+def _compute_map_fdr_cached(var_key: str, start: Optional[str], end: Optional[str]) -> List[Dict[str, Any]]:
     raw_list = []
     for name, meta in DISTRICTS_METADATA.items():
         try:
@@ -467,9 +493,27 @@ def get_map_fdr_summary(
         except Exception:
             continue
 
-    # Apply FDR correction
-    fdr_adjusted = benjamini_hochberg_correction(raw_list, alpha=0.05, p_key="p_value")
-    return fdr_adjusted
+    return benjamini_hochberg_correction(raw_list, alpha=0.05, p_key="p_value")
+
+
+@app.get("/map/fdr")
+def get_map_fdr_summary(
+    variable: str = Query("T2M"),
+    start: Optional[str] = Query("2001-01-01"),
+    end: Optional[str] = Query("2025-12-31"),
+) -> List[Dict[str, Any]]:
+    """
+    Compute Mann-Kendall trends for all 64 districts in Bangladesh simultaneously
+    and apply Benjamini-Hochberg False Discovery Rate (FDR) multiple testing correction (Section 6.3).
+    """
+    var_key = variable.strip().upper()
+    if var_key not in VARIABLE_INFO:
+        var_key = variable
+
+    s_str = start if isinstance(start, str) else "2001-01-01"
+    e_str = end if isinstance(end, str) else "2025-12-31"
+
+    return _compute_map_fdr_cached(var_key, s_str, e_str)
 
 
 @app.get("/compare", response_model=ComparisonResult)
@@ -505,12 +549,8 @@ def compare_districts(
     )
 
 
-@app.get("/gridded")
-def get_gridded_data(
-    variable: str = Query("ndvi", description="Gridded variable: ndvi, imerg_precip, tws_anomaly"),
-    time_index: int = Query(-1, description="Month index (0 to 299, default -1 for most recent)"),
-) -> Dict[str, Any]:
-    """Retrieve 2D spatial slice from pre-cached Zarr dataset covering Bangladesh."""
+@functools.lru_cache(maxsize=512)
+def _compute_gridded_cached(variable: str, time_index: int) -> Dict[str, Any]:
     ds = load_gridded_dataset()
     if variable not in ds.data_vars:
         raise HTTPException(status_code=400, detail=f"Gridded variable '{variable}' not found in Zarr store.")
@@ -553,6 +593,15 @@ def get_gridded_data(
             "mode": "cache",
         },
     }
+
+
+@app.get("/gridded")
+def get_gridded_data(
+    variable: str = Query("ndvi", description="Gridded variable: ndvi, imerg_precip, tws_anomaly"),
+    time_index: int = Query(-1, description="Month index (0 to 299, default -1 for most recent)"),
+) -> Dict[str, Any]:
+    """Retrieve 2D spatial slice from pre-cached Zarr dataset covering Bangladesh (cached in memory)."""
+    return _compute_gridded_cached(variable=variable, time_index=time_index)
 
 
 @app.get("/narration", response_model=NarrationResult)
