@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earth System Trend Detective | Bangladesh</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/style.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="header">
+    <div class="brand-container">
+      <div class="logo-badge">NASA</div>
+      <div class="title-group">
+        <h1>Earth System Trend Detective</h1>
+        <p>Offline-First Bangladesh Climate & Remote Sensing Trend Investigation</p>
+      </div>
+    </div>
+    <div class="header-status">
+      <span class="status-pill" id="carto-badge" title="CARTO Basemap integration active with authenticated key">
+        <span class="dot"></span> CARTO Basemap Active
+      </span>
+      <span class="status-pill offline" id="offline-badge">
+        <span class="dot"></span> OFFLINE=1 (Cache Only)
+      </span>
+      <button class="btn-provenance" id="open-drawer-btn" title="View dataset provenance and raw numbers">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        Provenance Drawer
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" data-tab="tab-single">District Explorer</button>
+    <button class="tab-btn" data-tab="tab-forecast">ML Forecasting</button>
+    <button class="tab-btn" data-tab="tab-compare">Comparison & Mirror Finder</button>
+    <button class="tab-btn" data-tab="tab-gridded">Gridded Zarr Explorer</button>
+    <button class="tab-btn" data-tab="tab-methods">Methods & Provenance</button>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="app-container">
+
+    <!-- Sidebar Controls -->
+    <aside class="controls-sidebar">
+      <div class="control-card">
+        <h3>Investigation Controls</h3>
+
+        <div class="form-group">
+          <label for="district-select">District (64 Total):</label>
+          <select id="district-select">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="variable-select">Environmental Variable:</label>
+          <select id="variable-select">
+            <option value="T2M" selected>Temperature at 2m (T2M) [°C]</option>
+            <option value="PRECTOTCORR">Precipitation (PRECTOTCORR) [mm/day]</option>
+            <option value="ALLSKY_SFC_SW_DWN">Solar Radiation (SW Downward) [MJ/m²]</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Time Period (2001 - 2025):</label>
+          <div class="date-range-row">
+            <div>
+              <label for="start-date" style="font-size:0.7rem;">Start Date</label>
+              <input type="date" id="start-date" value="2001-01-01" min="2001-01-01" max="2025-12-31">
+            </div>
+            <div>
+              <label for="end-date" style="font-size:0.7rem;">End Date</label>
+              <input type="date" id="end-date" value="2025-12-31" min="2001-01-01" max="2025-12-31">
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="analyze-btn" style="margin-top: 0.5rem;">
+          Run Trend Analysis
+        </button>
+      </div>
+
+      <div class="control-card">
+        <h3>Export Evidence</h3>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.75rem;">
+          Download filtered dataset with full scientific provenance and Theil-Sen fit values.
+        </p>
+        <div class="export-group">
+          <button class="btn-secondary" id="export-csv-btn">Export CSV</button>
+          <button class="btn-secondary" id="export-geojson-btn">Export GeoJSON</button>
+        </div>
+      </div>
+
+      <div class="control-card">
+        <h3>Chart Display Options</h3>
+        <div class="form-group">
+          <label><input type="checkbox" id="toggle-ci" checked> Show 95% Confidence Band</label>
+        </div>
+        <div class="form-group">
+          <label><input type="checkbox" id="toggle-decomp"> Show Seasonal Decomposition</label>
+        </div>
+        <div class="form-group">
+          <label><input type="checkbox" id="toggle-fdr"> Apply Benjamini-Hochberg FDR</label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="content-area">
+
+      <!-- TAB 1: District Explorer -->
+      <section id="tab-single" class="tab-pane active">
+        <!-- Stat Cards Grid -->
+        <div class="stats-grid">
+          <div class="stat-card warm">
+            <div class="stat-label">Theil-Sen Slope</div>
+            <div class="stat-value" id="stat-slope">+0.031</div>
+            <div class="stat-sub" id="stat-slope-units">degC per year</div>
+          </div>
+
+          <div class="stat-card gold">
+            <div class="stat-label">95% Confidence Interval</div>
+            <div class="stat-value" id="stat-ci">[0.014, 0.048]</div>
+            <div class="stat-sub">Rank-based exact bounds</div>
+          </div>
+
+          <div class="stat-card green">
+            <div class="stat-label">Mann-Kendall Test</div>
+            <div class="stat-value" id="stat-mk">Z = 3.61</div>
+            <div class="stat-sub" id="stat-p-val">p = 0.0003 (S = 41230)</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Observations & QA/QC</div>
+            <div class="stat-value" id="stat-n-obs">9,131</div>
+            <div class="stat-sub" id="stat-qa-qc">Coverage: 100% | Status: Passed</div>
+          </div>
+        </div>
+
+        <!-- Baseline-to-Recent Comparison Bar (Section 4 & 7.3) -->
+        <div style="background:#111111; border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0.75rem 1rem; margin-top:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; font-size:0.82rem;">
+          <div>
+            <strong style="color:var(--accent-yellow);">Total Period Net Change:</strong>
+            <span id="baseline-recent-text" style="color:var(--text-main); margin-left:0.5rem;">
+              Baseline (2001-2005): 25.1°C &rarr; Recent (2021-2025): 25.8°C | Net: +0.76°C (+3.1%)
+            </span>
+          </div>
+          <button class="btn-secondary" id="toggle-sensitivity-btn" style="padding:0.25rem 0.6rem; font-size:0.75rem;">
+            Window Sensitivity &darr;
+          </button>
+        </div>
+
+        <!-- Window Sensitivity Table (Section 11) -->
+        <div id="sensitivity-panel" style="display:none; background:#0d0d0d; border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:1rem; margin-top:0.5rem;">
+          <h4 style="font-size:0.8rem; text-transform:uppercase; color:var(--accent-yellow); margin-bottom:0.5rem;">
+            Time Window Sensitivity Analysis (Robustness Check)
+          </h4>
+          <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.75rem;">
+            Testing trend consistency across 10-year, 15-year, 20-year, and 25-year windows up to 2025 to verify whether change is persistent or cyclic.
+          </p>
+          <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border-color); color:var(--accent-yellow-bright);">
+                <th style="padding:4px 8px;">Window</th>
+                <th style="padding:4px 8px;">Span</th>
+                <th style="padding:4px 8px;">Theil-Sen Slope</th>
+                <th style="padding:4px 8px;">95% CI</th>
+                <th style="padding:4px 8px;">p-value</th>
+                <th style="padding:4px 8px;">Significant?</th>
+              </tr>
+            </thead>
+            <tbody id="sensitivity-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- View Grid: Map & Chart -->
+        <div class="view-grid" style="margin-top: 1.5rem;">
+          
+          <!-- District Map Panel -->
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                Bangladesh Spatial Inspector
+              </div>
+              <div class="panel-legend">
+                <div class="legend-item"><span class="legend-circle" style="background:#facc15; border:1px solid #ffffff;"></span> Increasing</div>
+                <div class="legend-item"><span class="legend-circle" style="background:#ffffff; border:1px solid #737373;"></span> Decreasing</div>
+                <div class="legend-item"><span class="legend-circle" style="background:#525252;"></span> No Trend</div>
+              </div>
+            </div>
+            <div id="map-container"></div>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">
+              Click any district circle to instantly inspect its time series, trend statistics, and provenance.
+            </p>
+          </div>
+
+          <!-- Time-Series Chart Panel -->
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                Time-Series & Fitted Theil-Sen Trend Line
+              </div>
+              <div style="font-size:0.75rem; color:var(--accent-yellow);" id="chart-subtitle">
+                Rajshahi (2001 - 2025)
+              </div>
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="trendChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bilingual Narration Agent Panel -->
+        <div class="narration-card" style="margin-top: 1.5rem;">
+          <div class="narration-header">
+            <div class="narration-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              Deterministic Narration Agent (Plain Language Insights)
+            </div>
+            <span class="verify-badge" id="narration-badge">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Strictly Verified (0 Hallucinations)
+            </span>
+          </div>
+
+          <div class="narration-bilingual-grid">
+            <div class="narration-box">
+              <h4>English Explanation (2 Sentences)</h4>
+              <p class="narration-text" id="narration-en">Loading plain English summary...</p>
+            </div>
+            <div class="narration-box">
+              <h4>Bangla Explanation (২টি বাক্য)</h4>
+              <p class="narration-text" id="narration-bn">বাংলা বিবরণ লোড হচ্ছে...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: ML Forecasting Component (Section 6.3 & 10) -->
+      <section id="tab-forecast" class="tab-pane" style="display:none;">
+        <div class="panel-card" style="margin-bottom:1.25rem;">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+              ML Forecasting Component (Section 6.3)
+            </div>
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <label style="margin:0; font-size:0.8rem;">Horizon:</label>
+              <select id="forecast-horizon-select" style="width:130px; padding:0.3rem 0.5rem;">
+                <option value="12">12 Months (1 yr)</option>
+                <option value="24">24 Months (2 yrs)</option>
+                <option value="36" selected>36 Months (3 yrs)</option>
+                <option value="48">48 Months (4 yrs)</option>
+                <option value="60">60 Months (5 yrs)</option>
+              </select>
+              <button class="btn-primary" id="run-forecast-btn" style="width:auto; padding:0.35rem 0.85rem; font-size:0.8rem;">Generate</button>
+            </div>
+          </div>
+
+          <!-- Model Validation Scorecard -->
+          <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+            <div class="stat-card warm">
+              <div class="stat-label">Model Architecture</div>
+              <div style="font-size:1.1rem; font-weight:700; color:#ffffff; margin:0.3rem 0;">Ridge AR + Harmonic</div>
+              <div class="stat-sub">Time-ordered 80/20 split</div>
+            </div>
+            <div class="stat-card green">
+              <div class="stat-label">ML Validation RMSE</div>
+              <div class="stat-value" id="fc-ml-rmse" style="font-size:1.4rem;">0.75</div>
+              <div class="stat-sub" id="fc-ml-mae">MAE: 0.58</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Baseline (Seasonal) RMSE</div>
+              <div class="stat-value" id="fc-base-rmse" style="font-size:1.4rem;">1.12</div>
+              <div class="stat-sub">Naive persistence benchmark</div>
+            </div>
+            <div class="stat-card gold">
+              <div class="stat-label">Skill Score vs. Baseline</div>
+              <div class="stat-value" id="fc-skill-score" style="font-size:1.4rem; color:var(--accent-yellow);">+33.0%</div>
+              <div class="stat-sub">RMSE error reduction</div>
+            </div>
+          </div>
+
+          <!-- Forecast Chart -->
+          <div class="chart-wrapper" style="margin-top:1.25rem;">
+            <canvas id="forecastChart"></canvas>
+          </div>
+
+          <!-- Scientific Caveat / Disclaimer -->
+          <div style="margin-top:1rem; background:rgba(250, 204, 21, 0.08); border:1px solid rgba(250, 204, 21, 0.3); padding:0.85rem; border-radius:var(--radius-sm); font-size:0.82rem; color:#fef08a;">
+            <strong>Mandatory Scientific Caveat (Section 6.3 & 10):</strong> Machine learning forecasts estimate possible future trajectory ranges from historical patterns under stationarity assumptions. Predictions are shown alongside empirical 95% prediction intervals and validation metrics, and must never be interpreted as certainty, causal attribution, or emergency risk warnings.
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: Two-District Comparison & Mirror Finder -->
+      <section id="tab-compare" class="tab-pane" style="display:none;">
+        <div class="comparison-grid">
+          <div class="delta-banner">
+            <div class="delta-icon">⚖️</div>
+            <div class="delta-text" style="flex:1;">
+              <h3 id="compare-banner-title">Comparing District Trends</h3>
+              <p id="compare-banner-summary">Select two districts below or use the Mirror Finder to discover opposite trends across Bangladesh.</p>
+            </div>
+            <button class="btn-primary" id="mirror-finder-btn" style="width:auto; padding:0.5rem 1rem; font-size:0.82rem; display:flex; align-items:center; gap:0.4rem;">
+              <span>🔍</span> Run Mirror Finder
+            </button>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title">District 1</div>
+              <select id="compare-d1-select" style="width: auto;"></select>
+            </div>
+            <div class="stat-card" style="margin-top:0.5rem;">
+              <div class="stat-label">Trend & Slope</div>
+              <div class="stat-value" id="comp-d1-slope">...</div>
+              <div class="stat-sub" id="comp-d1-sub">...</div>
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title">District 2</div>
+              <select id="compare-d2-select" style="width: auto;"></select>
+            </div>
+            <div class="stat-card" style="margin-top:0.5rem;">
+              <div class="stat-label">Trend & Slope</div>
+              <div class="stat-value" id="comp-d2-slope">...</div>
+              <div class="stat-sub" id="comp-d2-sub">...</div>
+            </div>
+          </div>
+
+          <div class="panel-card" style="grid-column: 1 / -1;">
+            <div class="panel-header">
+              <div class="panel-title">Dual District Comparison Chart</div>
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="compareChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: Gridded Zarr Explorer -->
+      <section id="tab-gridded" class="tab-pane" style="display:none;">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              Gridded Earth Observation (Zarr Store)
+            </div>
+            <div style="display: flex; gap: 1rem; align-items:center;">
+              <label style="margin:0;">Variable:</label>
+              <select id="gridded-var-select" style="width: 200px;">
+                <option value="ndvi" selected>MODIS NDVI (Vegetation)</option>
+                <option value="imerg_precip">IMERG Monthly Precip</option>
+                <option value="tws_anomaly">GRACE Water Storage Anomaly</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-slider-row">
+            <label id="grid-date-label">Date: 2001-01-01</label>
+            <input type="range" id="grid-time-slider" min="0" max="299" value="0" style="flex:1;">
+            <span style="font-size:0.75rem; color:var(--text-muted);" id="grid-bounds-label">300 Monthly Steps</span>
+          </div>
+
+          <div style="margin-top:1rem; position:relative; min-height:450px; background:#0f172a; border-radius:var(--radius-sm); border:1px solid var(--border-color); display:flex; justify-content:center; align-items:center;">
+            <canvas id="zarrCanvas" width="450" height="420" style="background:#0b111e; border-radius:4px;"></canvas>
+            <div id="zarr-legend" style="position:absolute; bottom:15px; right:15px; background:rgba(15,23,42,0.85); padding:8px 12px; border-radius:6px; font-size:0.75rem; border:1px solid var(--border-color);">
+              <div id="zarr-legend-title" style="font-weight:600; margin-bottom:4px;">NDVI Scale</div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span id="zarr-min-val">0.15</span>
+                <div style="width:100px; height:10px; background:linear-gradient(to right, #000000, #a16207, #facc15, #ffffff); border-radius:2px; border:1px solid #404040;"></div>
+                <span id="zarr-max-val">0.85</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: Methods & Provenance Documentation -->
+      <section id="tab-methods" class="tab-pane" style="display:none;">
+        <div class="panel-card" style="gap:1rem; line-height:1.7;">
+          <h2 style="font-size:1.2rem; color:var(--accent-yellow);">Methodology & Scientific Integrity</h2>
+          <p>
+            Earth System Trend Detective provides verifiable, transparent trend analysis of NASA Earth observation datasets across Bangladesh without language-model hallucinations or hidden approximations.
+          </p>
+
+          <h3 style="color:var(--text-main); margin-top:0.5rem;">1. Non-Parametric Trend Statistics</h3>
+          <ul style="padding-left:1.5rem; color:var(--text-muted); font-size:0.88rem;">
+            <li><strong>Mann-Kendall Test:</strong> Evaluates monotonic directional change over time. Tie corrections in observation ranks are strictly applied to variance calculations.</li>
+            <li><strong>Theil-Sen Slope:</strong> Median of all pairwise slopes, resistant to outliers (breakdown point &approx; 29.3%). Converted to annual rate of change (e.g. &deg;C/year).</li>
+            <li><strong>95% Confidence Interval:</strong> Hollander-Wolfe / Gilbert rank-based order statistics corresponding to &alpha; = 0.05.</li>
+            <li><strong>Benjamini-Hochberg (FDR):</strong> Multi-region false discovery rate correction controlling false positive rates across all 64 districts.</li>
+          </ul>
+
+          <h3 style="color:var(--text-main); margin-top:0.5rem;">2. NASA Datasets & Provenance</h3>
+          <ul style="padding-left:1.5rem; color:var(--text-muted); font-size:0.88rem;">
+            <li><strong>NASA POWER:</strong> Daily meteorology (MERRA-2 assimilation & GEOS/CERES radiation) for all 64 district centroids.</li>
+            <li><strong>NASA MODIS (MOD13Q1):</strong> Gridded Normalized Difference Vegetation Index (NDVI) tracking greenness and cropping cycles.</li>
+            <li><strong>NASA GPM IMERG:</strong> Gridded satellite precipitation data capturing monsoon variability.</li>
+            <li><strong>NASA JPL GRACE/GRACE-FO:</strong> Mascon RL06 terrestrial water storage anomalies tracking groundwater depletion.</li>
+          </ul>
+
+          <h3 style="color:var(--text-main); margin-top:0.5rem;">3. Responsible Scientific Interpretation</h3>
+          <div style="background:rgba(250, 204, 21, 0.08); border:1px solid rgba(250, 204, 21, 0.3); padding:0.85rem; border-radius:var(--radius-sm); font-size:0.85rem; color:#fef08a;">
+            <strong>Important Caveat:</strong> A p-value below 0.05 is not proof of causal attribution, nor does statistical significance automatically imply practical importance. Local micro-climates, sensor calibration changes, and multi-year climate cycles (such as ENSO and Indian Ocean Dipole) should always be evaluated alongside trend outputs.
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Provenance Sliding Drawer -->
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+  <aside class="provenance-drawer" id="provenance-drawer">
+    <div class="drawer-header">
+      <h2>Scientific Provenance & Raw JSON</h2>
+      <button class="btn-close" id="close-drawer-btn">&times;</button>
+    </div>
+    <div class="drawer-body">
+      <table class="provenance-meta-table">
+        <tr>
+          <td>Dataset ID:</td>
+          <td id="prov-dataset-id">NASA POWER daily point</td>
+        </tr>
+        <tr>
+          <td>Source URL:</td>
+          <td id="prov-source-url"><a href="https://power.larc.nasa.gov/api/temporal/daily/point" target="_blank" style="color:var(--accent-yellow);">https://power.larc.nasa.gov/api/temporal/daily/point</a></td>
+        </tr>
+        <tr>
+          <td>Retrieval Timestamp:</td>
+          <td id="prov-retrieved">2026-11-02T09:14:00Z</td>
+        </tr>
+        <tr>
+          <td>Data Mode:</td>
+          <td><span class="status-pill offline" id="prov-mode">cache</span></td>
+        </tr>
+        <tr>
+          <td>Selected Region:</td>
+          <td id="prov-district">Rajshahi (Centroid: 24.37°N, 88.60°E)</td>
+        </tr>
+      </table>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+        <h4 style="font-size:0.82rem; text-transform:uppercase; color:var(--text-muted);">Exact Tool Result JSON</h4>
+        <button class="btn-secondary" id="copy-json-btn" style="padding:0.25rem 0.6rem; font-size:0.75rem;">Copy JSON</button>
+      </div>
+      <pre class="raw-json-box" id="raw-json-display">{ ... }</pre>
+    </div>
+  </aside>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,965 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Dhaka",
+        "division": "Dhaka",
+        "code": "DHA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.4125,
+          23.8103
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gazipur",
+        "division": "Dhaka",
+        "code": "GAZ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.4267,
+          24.0023
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Narayanganj",
+        "division": "Dhaka",
+        "code": "NAR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.5,
+          23.6238
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Tangail",
+        "division": "Dhaka",
+        "code": "TAN"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.9167,
+          24.2513
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kishoreganj",
+        "division": "Dhaka",
+        "code": "KIS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.7766,
+          24.4449
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Manikganj",
+        "division": "Dhaka",
+        "code": "MAN"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.0003,
+          23.8617
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Munshiganj",
+        "division": "Dhaka",
+        "code": "MUN"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.5305,
+          23.5422
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Narsingdi",
+        "division": "Dhaka",
+        "code": "NSI"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.7154,
+          23.9322
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Faridpur",
+        "division": "Dhaka",
+        "code": "FAR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.8429,
+          23.6071
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gopalganj",
+        "division": "Dhaka",
+        "code": "GOP"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.8266,
+          23.0051
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Madaripur",
+        "division": "Dhaka",
+        "code": "MAD"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.1897,
+          23.1641
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Rajbari",
+        "division": "Dhaka",
+        "code": "RAJ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.6445,
+          23.7574
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Shariatpur",
+        "division": "Dhaka",
+        "code": "SHA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.4348,
+          23.2423
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Chattogram",
+        "division": "Chattogram",
+        "code": "CTG"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.7832,
+          22.3569
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Cox's Bazar",
+        "division": "Chattogram",
+        "code": "CXB"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          92.0058,
+          21.4272
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Cumilla",
+        "division": "Chattogram",
+        "code": "COM"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.1788,
+          23.4682
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Feni",
+        "division": "Chattogram",
+        "code": "FEN"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.3976,
+          23.0159
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brahmanbaria",
+        "division": "Chattogram",
+        "code": "BRA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.1119,
+          23.9571
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Rangamati",
+        "division": "Chattogram",
+        "code": "RAN"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          92.2985,
+          22.7324
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Noakhali",
+        "division": "Chattogram",
+        "code": "NOA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.0998,
+          22.8696
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Chandpur",
+        "division": "Chattogram",
+        "code": "CHA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.6667,
+          23.2333
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Lakshmipur",
+        "division": "Chattogram",
+        "code": "LAK"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.8412,
+          22.9425
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Khagrachhari",
+        "division": "Chattogram",
+        "code": "KHA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.9847,
+          23.1193
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bandarban",
+        "division": "Chattogram",
+        "code": "BAN"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          92.2184,
+          22.1953
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Rajshahi",
+        "division": "Rajshahi",
+        "code": "RAJ_DIST"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          88.6042,
+          24.3745
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bogura",
+        "division": "Rajshahi",
+        "code": "BOG"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.3777,
+          24.8465
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Pabna",
+        "division": "Rajshahi",
+        "code": "PAB"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.2372,
+          24.0064
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sirajganj",
+        "division": "Rajshahi",
+        "code": "SIR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.7008,
+          24.4534
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Naogaon",
+        "division": "Rajshahi",
+        "code": "NAO"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          88.9389,
+          24.8143
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Natore",
+        "division": "Rajshahi",
+        "code": "NAT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.0003,
+          24.4206
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Chapai Nawabganj",
+        "division": "Rajshahi",
+        "code": "CNG"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          88.2775,
+          24.5965
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Joypurhat",
+        "division": "Rajshahi",
+        "code": "JOY"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.0277,
+          25.1015
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Khulna",
+        "division": "Khulna",
+        "code": "KHU"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.5403,
+          22.8456
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Jashore",
+        "division": "Khulna",
+        "code": "JAS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.2182,
+          23.1664
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Satkhira",
+        "division": "Khulna",
+        "code": "SAT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.0705,
+          22.7185
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bagerhat",
+        "division": "Khulna",
+        "code": "BAG"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.7859,
+          22.6516
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kushtia",
+        "division": "Khulna",
+        "code": "KUS"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.1205,
+          23.9013
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Jhenaidah",
+        "division": "Khulna",
+        "code": "JHE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.1539,
+          23.5448
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Chuadanga",
+        "division": "Khulna",
+        "code": "CHU"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          88.8418,
+          23.6402
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Magura",
+        "division": "Khulna",
+        "code": "MAG"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.4199,
+          23.4873
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Meherpur",
+        "division": "Khulna",
+        "code": "MEH"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          88.6322,
+          23.7725
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Narail",
+        "division": "Khulna",
+        "code": "NAR_DIST"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.5127,
+          23.1725
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Barishal",
+        "division": "Barishal",
+        "code": "BAR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.3535,
+          22.701
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bhola",
+        "division": "Barishal",
+        "code": "BHO"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.6481,
+          22.6859
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Patuakhali",
+        "division": "Barishal",
+        "code": "PAT"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.3299,
+          22.3596
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Pirojpur",
+        "division": "Barishal",
+        "code": "PIR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.972,
+          22.5841
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Barguna",
+        "division": "Barishal",
+        "code": "BRG"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.1256,
+          22.157
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Jhalokathi",
+        "division": "Barishal",
+        "code": "JHA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.1987,
+          22.6406
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sylhet",
+        "division": "Sylhet",
+        "code": "SYL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.8687,
+          24.8949
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Moulvibazar",
+        "division": "Sylhet",
+        "code": "MOU"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.7774,
+          24.4829
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Habiganj",
+        "division": "Sylhet",
+        "code": "HAB"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.4155,
+          24.3749
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sunamganj",
+        "division": "Sylhet",
+        "code": "SUN"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.395,
+          25.0658
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Rangpur",
+        "division": "Rangpur",
+        "code": "RAN_DIST"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.2752,
+          25.7439
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Dinajpur",
+        "division": "Rangpur",
+        "code": "DIN"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          88.6355,
+          25.6217
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gaibandha",
+        "division": "Rangpur",
+        "code": "GAI"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.5403,
+          25.3288
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kurigram",
+        "division": "Rangpur",
+        "code": "KUR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.6362,
+          25.8054
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Lalmonirhat",
+        "division": "Rangpur",
+        "code": "LAL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.2847,
+          25.9923
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nilphamari",
+        "division": "Rangpur",
+        "code": "NIL"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          88.856,
+          25.9318
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Panchagarh",
+        "division": "Rangpur",
+        "code": "PAN"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          88.5542,
+          26.3411
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Thakurgaon",
+        "division": "Rangpur",
+        "code": "THA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          88.4617,
+          26.0337
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Mymensingh",
+        "division": "Mymensingh",
+        "code": "MYM"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.4203,
+          24.7471
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Jamalpur",
+        "division": "Mymensingh",
+        "code": "JAM"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          89.9378,
+          24.9375
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Netrokona",
+        "division": "Mymensingh",
+        "code": "NET"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.7277,
+          24.877
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sherpur",
+        "division": "Mymensingh",
+        "code": "SHE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.0153,
+          25.0205
+        ]
+      }
+    }
+  ]
+}
