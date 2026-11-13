@@ -871,6 +871,276 @@ pre.raw-json-box {
   border: 1px solid var(--border-color);
 }
 
+/* ==========================================================================
+   INTERACTIVE EXTENSIONS: GRIDDED ZARR, MIRROR FINDER & SPATIAL MAP
+   ========================================================================== */
+
+/* Map Toolbar & Controls */
+.map-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.map-toolbar select {
+  font-size: 0.78rem;
+  padding: 0.35rem 0.6rem;
+  width: auto;
+  min-width: 170px;
+}
+
+.map-badge-counter {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: var(--yellow-glow-subtle);
+  border: 1px solid var(--accent-yellow);
+  color: var(--accent-yellow);
+}
+
+/* Leaflet Dipole Link & Popups */
+@keyframes dashAnimation {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+.leaflet-dipole-arc {
+  stroke-dasharray: 8, 8;
+  animation: dashAnimation 1.2s linear infinite;
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--accent-yellow) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--bg-card) !important;
+}
+
+.map-popup-actions {
+  display: flex;
+  gap: 5px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.map-popup-btn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.map-popup-btn:hover {
+  background: var(--accent-yellow);
+  color: #000000;
+  border-color: var(--accent-yellow);
+}
+
+/* Gridded Zarr Playback Toolbar */
+.zarr-playback-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-card);
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.playback-btn {
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.playback-btn:hover {
+  border-color: var(--accent-yellow);
+  color: var(--accent-yellow);
+}
+
+.playback-btn.active {
+  background: var(--accent-yellow);
+  color: #000000;
+  border-color: var(--accent-yellow);
+}
+
+.zarr-status-pill {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-yellow);
+  margin-left: auto;
+  font-family: Consolas, monospace;
+}
+
+/* Canvas Inspector Readout Badge */
+.zarr-inspector-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(10, 10, 10, 0.88);
+  border: 1px solid var(--accent-yellow);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-family: Consolas, monospace;
+  color: var(--accent-yellow-bright);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.light-theme .zarr-inspector-badge {
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f172a;
+}
+
+/* Gridded Pixel Probe Time Series Panel */
+.zarr-probe-panel {
+  margin-top: 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+}
+
+/* Mirror Leaderboard & Shared Driver Card */
+.mirror-leaderboard-card {
+  margin-top: 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+}
+
+.leaderboard-table th {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 2px solid var(--border-color);
+  color: var(--accent-yellow-bright);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.leaderboard-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.leaderboard-table tr:hover td {
+  background: var(--bg-card-hover);
+}
+
+.shared-driver-card {
+  margin-top: 1.25rem;
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card-hover) 100%);
+  border: 1px solid var(--accent-yellow);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  position: relative;
+  box-shadow: 0 4px 20px var(--yellow-glow-subtle);
+}
+
+.shared-driver-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.shared-driver-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--yellow-glow);
+  color: var(--accent-yellow-bright);
+  border: 1px solid var(--accent-yellow);
+}
+
+.shared-driver-title-en {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.25rem;
+}
+
+.shared-driver-title-bn {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent-yellow);
+  margin-bottom: 0.75rem;
+}
+
+.shared-driver-narrative {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-soft);
+  margin-bottom: 0.75rem;
+}
+
+.shared-driver-factors {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.shared-driver-factors li {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.shared-driver-factors li::before {
+  content: "•";
+  color: var(--accent-yellow);
+  font-weight: bold;
+}
+
 /* Responsive adjustments */
 @media (max-width: 1080px) {
   .app-container {

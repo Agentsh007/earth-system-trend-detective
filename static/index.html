@@ -222,9 +222,35 @@
                 <div class="legend-item"><span class="legend-circle" style="background:#525252;"></span> <span id="txt-legend-none">No Trend</span></div>
               </div>
             </div>
+
+            <!-- Interactive Map Toolbar: Division Filter & Metric Modes -->
+            <div class="map-toolbar">
+              <select id="map-division-filter">
+                <option value="all" selected>All Divisions (64 Districts)</option>
+                <option value="Dhaka">Dhaka Division (13)</option>
+                <option value="Rajshahi">Rajshahi Division (8)</option>
+                <option value="Chattogram">Chattogram Division (11)</option>
+                <option value="Khulna">Khulna Division (10)</option>
+                <option value="Sylhet">Sylhet Division (4)</option>
+                <option value="Rangpur">Rangpur Division (8)</option>
+                <option value="Barishal">Barishal Division (6)</option>
+                <option value="Mymensingh">Mymensingh Division (4)</option>
+              </select>
+
+              <select id="map-metric-mode">
+                <option value="slope" selected>Metric: Sen's Slope Rate</option>
+                <option value="significance">Metric: Significance (p &lt; 0.05)</option>
+                <option value="robustness">Metric: Robustness Tier</option>
+              </select>
+
+              <button class="btn-secondary" id="map-clear-dipole-btn" style="display:none; padding:0.35rem 0.6rem; font-size:0.75rem;">
+                <span id="txt-clear-dipole">Clear Dipole Arc</span>
+              </button>
+            </div>
+
             <div id="map-container"></div>
             <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;" id="txt-map-hint">
-              Click any district circle to instantly inspect its time series, trend statistics, and provenance.
+              Click any district circle to inspect trend statistics, load in inspector, or launch Mirror Finder.
             </p>
           </div>
 
@@ -395,6 +421,52 @@
             </div>
           </div>
         </div>
+
+        <!-- Shared Climatological Driver Scientific Card (Section 6.5 & 11) -->
+        <div id="shared-driver-card" class="shared-driver-card" style="display:none;">
+          <div class="shared-driver-header">
+            <div>
+              <span class="shared-driver-badge" id="driver-badge">Scientific Driver</span>
+              <h3 class="shared-driver-title-en" id="driver-title-en">Climatological / Hydrological Driver</h3>
+              <h4 class="shared-driver-title-bn" id="driver-title-bn">জল-আবহাওয়া চালিকা শক্তি</h4>
+            </div>
+            <button class="btn-secondary" id="driver-view-map-btn" style="padding:0.4rem 0.8rem; font-size:0.78rem;">
+              <span id="txt-driver-map-btn">🗺️ Show Dipole on Map</span>
+            </button>
+          </div>
+          <p class="shared-driver-narrative" id="driver-narrative-en">...</p>
+          <p class="shared-driver-narrative" id="driver-narrative-bn" style="color:var(--text-muted); border-top:1px dashed var(--border-color); padding-top:0.5rem;">...</p>
+          <ul class="shared-driver-factors" id="driver-factors-list"></ul>
+        </div>
+
+        <!-- Top 5 Strongest Mirror Pairs Leaderboard -->
+        <div class="mirror-leaderboard-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <h3 style="font-size:0.95rem; font-weight:700; color:var(--text-main);" id="txt-leaderboard-title">Top 5 Strongest Mirror Pairs in Bangladesh</h3>
+              <p style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;" id="txt-leaderboard-sub">Ranked by maximum slope divergence delta across 64 districts</p>
+            </div>
+            <span class="map-badge-counter" id="txt-leaderboard-var">Variable: T2M</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th id="th-lb-rank">Rank</th>
+                  <th id="th-lb-target">Target District</th>
+                  <th id="th-lb-mirror">Mirror District</th>
+                  <th id="th-lb-d1slope">Target Slope</th>
+                  <th id="th-lb-d2slope">Mirror Slope</th>
+                  <th id="th-lb-delta">Divergence Δ</th>
+                  <th id="th-lb-action">Action</th>
+                </tr>
+              </thead>
+              <tbody id="mirror-leaderboard-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
       <!-- TAB 4: Gridded Zarr Explorer -->
@@ -413,31 +485,97 @@
             <div class="panel-title">
               <span id="txt-gridded-panel-title">Gridded Earth Observation (Zarr Store)</span>
             </div>
-            <div style="display: flex; gap: 1rem; align-items:center;">
-              <label style="margin:0;" id="txt-label-grid-var">Variable:</label>
-              <select id="gridded-var-select" style="width: 220px;">
-                <option value="ndvi" selected>MODIS NDVI (Vegetation)</option>
-                <option value="imerg_precip">IMERG Monthly Precip</option>
-                <option value="tws_anomaly">GRACE Water Storage Anomaly</option>
-              </select>
+            <div style="display: flex; gap: 1rem; align-items:center; flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:0.4rem;">
+                <label style="margin:0; font-size:0.8rem;" id="txt-label-grid-var">Variable:</label>
+                <select id="gridded-var-select" style="width: 210px;">
+                  <option value="ndvi" selected>MODIS NDVI (Vegetation)</option>
+                  <option value="imerg_precip">IMERG Monthly Precip</option>
+                  <option value="tws_anomaly">GRACE Water Storage Anomaly</option>
+                </select>
+              </div>
+              <div style="display:flex; align-items:center; gap:0.4rem;">
+                <label style="margin:0; font-size:0.8rem;" id="txt-label-grid-cmap">Colormap:</label>
+                <select id="gridded-cmap-select" style="width: 170px;">
+                  <option value="yellow" selected>Yellow-Black-White</option>
+                  <option value="viridis">Viridis (Scientific)</option>
+                  <option value="thermal">Thermal / Magma</option>
+                  <option value="chlorophyll">Chlorophyll Green</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          <div class="grid-slider-row">
-            <label id="grid-date-label">Date: 2001-01-01</label>
+          <!-- Timeline Playback Toolbar -->
+          <div class="zarr-playback-bar">
+            <button class="playback-btn" id="zarr-step-back-btn" title="Previous Month">⏪ <span id="txt-btn-step-back">Prev</span></button>
+            <button class="playback-btn" id="zarr-play-btn" title="Play Timeline Animation">▶ <span id="txt-btn-play">Play</span></button>
+            <button class="playback-btn" id="zarr-step-fwd-btn" title="Next Month">⏩ <span id="txt-btn-step-fwd">Next</span></button>
+            <button class="playback-btn" id="zarr-reset-btn" title="Reset to Start">🔄 <span id="txt-btn-reset">Reset</span></button>
+            
+            <div style="display:flex; align-items:center; gap:0.4rem; margin-left:0.5rem;">
+              <label style="margin:0; font-size:0.78rem;" id="txt-label-speed">Speed:</label>
+              <select id="zarr-speed-select" style="width:105px; padding:0.25rem 0.4rem; font-size:0.75rem;">
+                <option value="1000">1x (1.0s)</option>
+                <option value="400" selected>2.5x (0.4s)</option>
+                <option value="180">5x (0.18s)</option>
+              </select>
+            </div>
+
+            <div class="zarr-status-pill" id="zarr-status-pill">Month 1 / 300 (2001-01)</div>
+          </div>
+
+          <!-- Time Slider -->
+          <div class="grid-slider-row" style="margin-top:0.5rem;">
+            <label id="grid-date-label" style="min-width:170px;">Date: 2001-01-01</label>
             <input type="range" id="grid-time-slider" min="0" max="299" value="0" style="flex:1;">
             <span style="font-size:0.75rem; color:var(--text-muted);" id="grid-bounds-label">300 Monthly Steps</span>
           </div>
 
-          <div style="margin-top:1rem; position:relative; min-height:450px; background:var(--bg-card-subtle); border-radius:var(--radius-sm); border:1px solid var(--border-color); display:flex; justify-content:center; align-items:center;">
+          <!-- 2D Canvas Heatmap Container with Inspector Readout -->
+          <div style="margin-top:1rem; position:relative; min-height:450px; background:var(--bg-card-subtle); border-radius:var(--radius-sm); border:1px solid var(--border-color); display:flex; justify-content:center; align-items:center; cursor:crosshair;" id="zarr-canvas-wrapper">
             <canvas id="zarrCanvas" width="450" height="420" style="background:var(--bg-primary); border-radius:4px;"></canvas>
+            
+            <!-- Hover Coordinate & Value Inspector Badge -->
+            <div class="zarr-inspector-badge" id="zarr-inspector-badge">
+              <span id="txt-inspector-coord">Lat: -- Lon: --</span>
+              <span style="color:var(--text-main);">|</span>
+              <span id="txt-inspector-val">Val: --</span>
+            </div>
+
+            <!-- Legend Overlay -->
             <div id="zarr-legend" style="position:absolute; bottom:15px; right:15px; background:var(--bg-card); padding:8px 12px; border-radius:6px; font-size:0.75rem; border:1px solid var(--border-color);">
               <div id="zarr-legend-title" style="font-weight:600; margin-bottom:4px; color:var(--text-main);">NDVI Scale</div>
               <div style="display:flex; align-items:center; gap:8px;">
                 <span id="zarr-min-val" style="color:var(--text-muted);">0.15</span>
-                <div style="width:100px; height:10px; background:linear-gradient(to right, #000000, #a16207, #facc15, #ffffff); border-radius:2px; border:1px solid #404040;"></div>
+                <div id="zarr-legend-gradient" style="width:100px; height:10px; background:linear-gradient(to right, #000000, #a16207, #facc15, #ffffff); border-radius:2px; border:1px solid #404040;"></div>
                 <span id="zarr-max-val" style="color:var(--text-main);">0.85</span>
               </div>
+            </div>
+          </div>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem; text-align:center;" id="txt-zarr-hint">
+            💡 Hover over the canvas to inspect grid values. Click any point to probe and extract its 25-year time series below.
+          </p>
+
+          <!-- Interactive Grid Point Time-Series Probe Panel -->
+          <div id="zarr-pixel-probe-panel" class="zarr-probe-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+              <div>
+                <h4 style="font-size:0.9rem; font-weight:700; color:var(--accent-yellow);" id="probe-panel-title">
+                  Grid Point Time Series Probe (2001–2025)
+                </h4>
+                <p style="font-size:0.75rem; color:var(--text-muted);" id="probe-panel-coords">
+                  Coordinate: 23.75°N, 90.25°E (Central Bangladesh)
+                </p>
+              </div>
+              <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <span class="map-badge-counter" id="probe-slope-badge">Slope: +0.0018 /yr</span>
+                <span class="map-badge-counter" id="probe-sig-badge">p = 0.002 (Sig)</span>
+                <span class="map-badge-counter" id="probe-stats-badge">Mean: 0.54</span>
+              </div>
+            </div>
+            <div class="chart-wrapper" style="height:220px;">
+              <canvas id="zarrPixelChart"></canvas>
             </div>
           </div>
         </div>

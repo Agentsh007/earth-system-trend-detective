@@ -103,6 +103,27 @@ class MirrorFinderResult(BaseModel):
     divergence_delta: float
     mirror_direction: str
     explanation: str
+    top_pairs: Optional[List[Dict[str, Any]]] = None
+    shared_driver: Optional[Dict[str, Any]] = None
+
+
+class GriddedTimeSeriesPoint(BaseModel):
+    date: str
+    value: Optional[float] = None
+
+
+class GriddedTimeSeriesResult(BaseModel):
+    variable: str
+    long_name: str
+    units: str
+    lat: float
+    lon: float
+    grid_y: int
+    grid_x: int
+    n_steps: int
+    series: List[GriddedTimeSeriesPoint]
+    trend: Dict[str, Any]
+    summary: Dict[str, Any]
 
 
 class SensitivityResult(BaseModel):

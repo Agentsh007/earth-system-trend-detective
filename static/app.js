@@ -35,6 +35,16 @@ const compareCache = new Map();
 const griddedCache = new Map();
 let fdrCache = new Map();
 
+// === NEW: Interactive Extension State ===
+let zarrPixelChartInstance = null;   // Chart.js instance for pixel probe
+let zarrPlaybackTimer = null;        // setInterval handle for timeline playback
+let zarrIsPlaying = false;           // playback running flag
+let zarrCurrentGridData = null;      // cached latest grid response (for hover readout)
+let currentColormap = "yellow";      // active colormap: yellow | viridis | thermal | chlorophyll
+let dipoleLine = null;               // Leaflet polyline for mirror dipole arc
+let lastMirrorResult = null;         // cached mirror finder response (for map dipole)
+let mapMetricData = null;            // cached /map/fdr data for metric modes
+
 // CARTO API Key provided by user
 const CARTO_API_KEY = "cb1_4do5_1_fe36f1854b4cfdde4ab86fd2";
 
@@ -143,6 +153,30 @@ const TRANSLATIONS = {
     // Gridded tab
     griddedVarLabel: "Variable:",
     griddedStepsLabel: "300 Monthly Steps",
+    griddedCmapLabel: "Colormap:",
+    btnStepBack: "Prev",
+    btnPlay: "Play",
+    btnPause: "Pause",
+    btnStepFwd: "Next",
+    btnReset: "Reset",
+    speedLabel: "Speed:",
+    zarrHint: "💡 Hover over the canvas to inspect grid values. Click any point to probe and extract its 25-year time series below.",
+    probeTitle: "Grid Point Time Series Probe (2001–2025)",
+    // Interactive Map
+    btnClearDipole: "Clear Dipole Arc",
+    // Mirror Leaderboard & Shared Driver
+    leaderboardTitle: "Top 5 Strongest Mirror Pairs in Bangladesh",
+    leaderboardSub: "Ranked by maximum slope divergence delta across 64 districts",
+    thLbRank: "Rank",
+    thLbTarget: "Target District",
+    thLbMirror: "Mirror District",
+    thLbD1Slope: "Target Slope",
+    thLbD2Slope: "Mirror Slope",
+    thLbDelta: "Divergence Δ",
+    thLbAction: "Action",
+    btnComparePair: "⚖️ Load Pair",
+    driverBadge: "Scientific Driver",
+    btnDriverMap: "🗺️ Show Dipole on Map",
     // Provenance drawer
     drawerTitle: "Scientific Provenance & Raw JSON",
     provThDataset: "Dataset ID:",
@@ -249,6 +283,30 @@ const TRANSLATIONS = {
     // Gridded tab
     griddedVarLabel: "চলক:",
     griddedStepsLabel: "৩০০ মাসের ধাপ",
+    griddedCmapLabel: "কালারম্যাপ:",
+    btnStepBack: "পূর্ববর্তী",
+    btnPlay: "প্লে",
+    btnPause: "পজ",
+    btnStepFwd: "পরবর্তী",
+    btnReset: "রিসেট",
+    speedLabel: "গতি:",
+    zarrHint: "💡 গ্রিডের মান দেখতে ক্যানভাসে মাউস রাখুন। নিচে ২৫ বছরের সময়ক্রম গ্রাফ দেখতে যেকোনো পয়েন্টে ক্লিক করুন।",
+    probeTitle: "গ্রিড পয়েন্ট সময়ক্রম বিশ্লেষণ (২০০১–২০২৫)",
+    // Interactive Map
+    btnClearDipole: "দ্বিমেরু রেখা মুছুন",
+    // Mirror Leaderboard & Shared Driver
+    leaderboardTitle: "বাংলাদেশের শীর্ষ ৫টি বিপরীতমুখী (মিরর) জোড়া",
+    leaderboardSub: "৬৪টি জেলার মধ্যে সর্বোচ্চ ট্রেন্ড পার্থক্যের ভিত্তিতে সাজানো",
+    thLbRank: "র‍্যাংক",
+    thLbTarget: "মূল জেলা",
+    thLbMirror: "মিরর জেলা",
+    thLbD1Slope: "মূল স্লোপ",
+    thLbD2Slope: "মিরর স্লোপ",
+    thLbDelta: "পার্থক্য Δ",
+    thLbAction: "পদক্ষেপ",
+    btnComparePair: "⚖️ জোড়া লোড করুন",
+    driverBadge: "বৈজ্ঞানিক চালিকাশক্তি",
+    btnDriverMap: "🗺️ মানচিত্রে দ্বিমেরু রেখা দেখুন",
     // Provenance drawer
     drawerTitle: "বৈজ্ঞানিক প্রমাণপত্র ও মূল JSON",
     provThDataset: "ডেটাসেট আইডি:",
@@ -588,11 +646,26 @@ async function loadDistricts() {
         offset: [0, -5]
       });
 
+      // Interactive popup with quick-action buttons
       marker.on("click", () => {
-        distSelect.value = d.name;
-        loadTrend();
+        const popup = L.popup({ className: "district-popup", maxWidth: 250 })
+          .setLatLng([d.lat, d.lon])
+          .setContent(`
+            <div style="font-size:0.85rem;">
+              <b style="color:var(--accent-yellow);">${d.name}</b>
+              <span style="color:var(--text-muted); font-size:0.75rem;"> (${d.division})</span>
+              <div class="map-popup-actions">
+                <button class="map-popup-btn" onclick="popupInspectTrend('${d.name}')">📊 Inspect Trend</button>
+                <button class="map-popup-btn" onclick="popupSetDistrict1('${d.name}')">1️⃣ Set as District 1</button>
+                <button class="map-popup-btn" onclick="popupSetDistrict2('${d.name}')">2️⃣ Set as District 2</button>
+              </div>
+            </div>
+          `)
+          .openOn(mapInstance);
       });
 
+      // Store district data on marker for metric modes
+      marker._districtData = d;
       districtMarkers[d.name] = marker;
     });
 
@@ -641,12 +714,70 @@ function initEventListeners() {
   slider.addEventListener("input", (e) => {
     if (sliderThrottleTimer) clearTimeout(sliderThrottleTimer);
     sliderThrottleTimer = setTimeout(() => {
+      zarrPause(); // stop playback if user manually drags
       loadGridded(e.target.value);
     }, 40);
   });
   document.getElementById("gridded-var-select").addEventListener("change", () => {
+    zarrPause();
     loadGridded(slider.value);
   });
+
+  // Colormap selector
+  const cmapSelect = document.getElementById("gridded-cmap-select");
+  if (cmapSelect) {
+    cmapSelect.addEventListener("change", () => {
+      currentColormap = cmapSelect.value;
+      updateLegendGradient();
+      // Re-render current grid with new colormap
+      if (zarrCurrentGridData) {
+        const variable = document.getElementById("gridded-var-select").value || "ndvi";
+        renderGridCanvas(zarrCurrentGridData, variable);
+      }
+    });
+  }
+
+  // Gridded Playback Controls
+  const playBtn = document.getElementById("zarr-play-btn");
+  if (playBtn) playBtn.addEventListener("click", () => zarrTogglePlay());
+  const stepBackBtn = document.getElementById("zarr-step-back-btn");
+  if (stepBackBtn) stepBackBtn.addEventListener("click", () => zarrStepBack());
+  const stepFwdBtn = document.getElementById("zarr-step-fwd-btn");
+  if (stepFwdBtn) stepFwdBtn.addEventListener("click", () => zarrStepForward());
+  const resetBtn = document.getElementById("zarr-reset-btn");
+  if (resetBtn) resetBtn.addEventListener("click", () => zarrReset());
+
+  // Speed selector: if playback is running, restart with new speed
+  const speedSelect = document.getElementById("zarr-speed-select");
+  if (speedSelect) {
+    speedSelect.addEventListener("change", () => {
+      if (zarrIsPlaying) {
+        zarrPause();
+        zarrPlay();
+      }
+    });
+  }
+
+  // Initialize Zarr canvas hover + click interaction
+  initZarrCanvasInteraction();
+
+  // Map Division Filter
+  const divFilter = document.getElementById("map-division-filter");
+  if (divFilter) {
+    divFilter.addEventListener("change", () => applyDivisionFilter(divFilter.value));
+  }
+
+  // Map Metric Mode Selector
+  const metricMode = document.getElementById("map-metric-mode");
+  if (metricMode) {
+    metricMode.addEventListener("change", () => applyMapMetricMode(metricMode.value));
+  }
+
+  // Map Clear Dipole Button
+  const clearDipoleBtn = document.getElementById("map-clear-dipole-btn");
+  if (clearDipoleBtn) {
+    clearDipoleBtn.addEventListener("click", () => clearDipoleArc());
+  }
 
   // Export buttons
   document.getElementById("export-csv-btn").addEventListener("click", () => {
@@ -1104,25 +1235,7 @@ async function loadForecast() {
   }
 }
 
-// Mirror Finder: Opposite-Trend Detector across Bangladesh (Section 6.5 & 11)
-async function runMirrorFinder() {
-  const d1 = document.getElementById("compare-d1-select").value || "Rajshahi";
-  const variable = document.getElementById("variable-select").value || "T2M";
-
-  try {
-    const res = await fetch(`/mirror-finder?district=${encodeURIComponent(d1)}&variable=${encodeURIComponent(variable)}`);
-    const mirror = await res.json();
-
-    // Automatically set district 2 to the mirror district
-    document.getElementById("compare-d2-select").value = mirror.mirror_district;
-    document.getElementById("compare-banner-summary").textContent = mirror.explanation;
-
-    // Reload comparison view
-    loadComparison();
-  } catch (err) {
-    console.error("Mirror finder error:", err);
-  }
-}
+// Mirror Finder: now handled by the enhanced runMirrorFinder() defined below
 
 // Update Provenance Drawer Content
 function updateProvenanceDrawer(data) {
@@ -1279,57 +1392,632 @@ async function loadGridded(timeIdx = 0) {
       griddedCache.set(cacheKey, gridData);
     }
 
+    zarrCurrentGridData = gridData;
+
     document.getElementById("grid-date-label").textContent = `${currentLang === 'bn' ? 'পর্যবেক্ষণ মাস:' : 'Observation Month:'} ${gridData.date}`;
     document.getElementById("zarr-min-val").textContent = gridData.min_value;
     document.getElementById("zarr-max-val").textContent = gridData.max_value;
     document.getElementById("zarr-legend-title").textContent = `${gridData.long_name} (${gridData.units})`;
 
-    // Render on Canvas
-    const canvas = document.getElementById("zarrCanvas");
-    const ctx = canvas.getContext("2d");
-    const matrix = gridData.grid; // [lat][lon]
-    const rows = matrix.length;
-    const cols = matrix[0].length;
-
-    const cellW = canvas.width / cols;
-    const cellH = canvas.height / rows;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const val = matrix[rows - 1 - r][c]; // Flip vertically for lat
-        if (val === null || isNaN(val)) {
-          ctx.fillStyle = currentTheme === "light" ? "#f1f5f9" : COLOR_BLACK;
-        } else {
-          // Normalize 0 to 1
-          const norm = Math.max(0, Math.min(1, (val - gridData.min_value) / (gridData.max_value - gridData.min_value || 1)));
-          ctx.fillStyle = getHeatmapColor(variable, norm);
-        }
-        ctx.fillRect(c * cellW, r * cellH, cellW - 1, cellH - 1);
-      }
+    // Update playback status pill
+    const statusPill = document.getElementById("zarr-status-pill");
+    if (statusPill) {
+      const monthNum = parseInt(timeIdx) + 1;
+      const dateStr = gridData.date ? gridData.date.substring(0, 7) : "";
+      statusPill.textContent = `Month ${monthNum} / ${gridData.total_time_steps || 300} (${dateStr})`;
     }
+
+    // Update legend gradient based on colormap
+    updateLegendGradient();
+
+    // Render on Canvas
+    renderGridCanvas(gridData, variable);
+
   } catch (err) {
     if (err.name === "AbortError") return;
     console.error("Gridded Zarr error:", err);
   }
 }
 
-// Perceptual Heatmap Color Gradient: Black -> Yellow -> White
-function getHeatmapColor(variable, norm) {
-  if (norm < 0.6) {
-    // 0.0 to 0.6: Black (0,0,0) to Vibrant Yellow (250, 204, 21)
-    const t = norm / 0.6;
-    const r = Math.round(250 * t);
-    const g = Math.round(204 * t);
-    const b = Math.round(21 * t);
-    return `rgb(${r}, ${g}, ${b})`;
-  } else {
-    // 0.6 to 1.0: Vibrant Yellow (250, 204, 21) to Pure White (255, 255, 255)
-    const t = (norm - 0.6) / 0.4;
-    const r = Math.round(250 + 5 * t);
-    const g = Math.round(204 + 51 * t);
-    const b = Math.round(21 + 234 * t);
-    return `rgb(${r}, ${g}, ${b})`;
+// Render 2D grid data onto Canvas element
+function renderGridCanvas(gridData, variable) {
+  const canvas = document.getElementById("zarrCanvas");
+  const ctx = canvas.getContext("2d");
+  const matrix = gridData.grid;
+  const rows = matrix.length;
+  const cols = matrix[0].length;
+
+  const cellW = canvas.width / cols;
+  const cellH = canvas.height / rows;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const val = matrix[rows - 1 - r][c]; // Flip vertically for lat
+      if (val === null || isNaN(val)) {
+        ctx.fillStyle = currentTheme === "light" ? "#f1f5f9" : COLOR_BLACK;
+      } else {
+        const norm = Math.max(0, Math.min(1, (val - gridData.min_value) / (gridData.max_value - gridData.min_value || 1)));
+        ctx.fillStyle = getHeatmapColor(variable, norm);
+      }
+      ctx.fillRect(c * cellW, r * cellH, cellW - 1, cellH - 1);
+    }
   }
+}
+
+// === COLORMAP ENGINE: Multiple Scientific Colormaps ===
+function getHeatmapColor(variable, norm) {
+  const cmap = currentColormap;
+
+  if (cmap === "viridis") {
+    return viridisColor(norm);
+  } else if (cmap === "thermal") {
+    return thermalColor(norm);
+  } else if (cmap === "chlorophyll") {
+    return chlorophyllColor(norm);
+  }
+  // Default: Yellow-Black-White
+  if (norm < 0.6) {
+    const t = norm / 0.6;
+    return `rgb(${Math.round(250 * t)}, ${Math.round(204 * t)}, ${Math.round(21 * t)})`;
+  } else {
+    const t = (norm - 0.6) / 0.4;
+    return `rgb(${Math.round(250 + 5 * t)}, ${Math.round(204 + 51 * t)}, ${Math.round(21 + 234 * t)})`;
+  }
+}
+
+function viridisColor(n) {
+  // Approximation of viridis: dark purple → teal → yellow
+  const r = Math.round(68 + (253 - 68) * n * n);
+  const g = Math.round(1 + (231 - 1) * n);
+  const b = Math.round(84 + (37 - 84) * n);
+  return `rgb(${Math.min(255,r)}, ${Math.min(255,g)}, ${Math.max(0,b)})`;
+}
+
+function thermalColor(n) {
+  // Magma / thermal: black → dark red → orange → yellow-white
+  if (n < 0.33) {
+    const t = n / 0.33;
+    return `rgb(${Math.round(180 * t)}, ${Math.round(20 * t)}, ${Math.round(60 * t)})`;
+  } else if (n < 0.66) {
+    const t = (n - 0.33) / 0.33;
+    return `rgb(${Math.round(180 + 65 * t)}, ${Math.round(20 + 120 * t)}, ${Math.round(60 - 30 * t)})`;
+  } else {
+    const t = (n - 0.66) / 0.34;
+    return `rgb(${Math.round(245 + 10 * t)}, ${Math.round(140 + 115 * t)}, ${Math.round(30 + 225 * t)})`;
+  }
+}
+
+function chlorophyllColor(n) {
+  // Dark green → bright green → yellow-green
+  if (n < 0.5) {
+    const t = n / 0.5;
+    return `rgb(${Math.round(10 + 50 * t)}, ${Math.round(50 + 155 * t)}, ${Math.round(10 + 30 * t)})`;
+  } else {
+    const t = (n - 0.5) / 0.5;
+    return `rgb(${Math.round(60 + 190 * t)}, ${Math.round(205 + 50 * t)}, ${Math.round(40 + 20 * t)})`;
+  }
+}
+
+// Update the legend gradient strip for the active colormap
+function updateLegendGradient() {
+  const el = document.getElementById("zarr-legend-gradient");
+  if (!el) return;
+  const gradients = {
+    yellow: "linear-gradient(to right, #000000, #a16207, #facc15, #ffffff)",
+    viridis: "linear-gradient(to right, #440154, #31688e, #35b779, #fde725)",
+    thermal: "linear-gradient(to right, #000000, #b41430, #f59020, #ffffcc)",
+    chlorophyll: "linear-gradient(to right, #0a320a, #3cb43c, #b4e628, #fafe3c)",
+  };
+  el.style.background = gradients[currentColormap] || gradients.yellow;
+}
+
+// === GRIDDED TIMELINE PLAYBACK ===
+function zarrPlay() {
+  if (zarrIsPlaying) return;
+  zarrIsPlaying = true;
+  const playBtn = document.getElementById("zarr-play-btn");
+  const t = TRANSLATIONS[currentLang];
+  playBtn.querySelector("span").textContent = t.btnPause || "Pause";
+  playBtn.classList.add("active");
+
+  const speed = parseInt(document.getElementById("zarr-speed-select").value) || 400;
+  zarrPlaybackTimer = setInterval(() => {
+    const slider = document.getElementById("grid-time-slider");
+    let idx = parseInt(slider.value);
+    if (idx >= 299) {
+      zarrPause();
+      return;
+    }
+    idx++;
+    slider.value = idx;
+    loadGridded(idx);
+  }, speed);
+}
+
+function zarrPause() {
+  zarrIsPlaying = false;
+  if (zarrPlaybackTimer) {
+    clearInterval(zarrPlaybackTimer);
+    zarrPlaybackTimer = null;
+  }
+  const playBtn = document.getElementById("zarr-play-btn");
+  const t = TRANSLATIONS[currentLang];
+  playBtn.querySelector("span").textContent = t.btnPlay || "Play";
+  playBtn.classList.remove("active");
+}
+
+function zarrTogglePlay() {
+  if (zarrIsPlaying) zarrPause(); else zarrPlay();
+}
+
+function zarrStepBack() {
+  zarrPause();
+  const slider = document.getElementById("grid-time-slider");
+  let idx = Math.max(0, parseInt(slider.value) - 1);
+  slider.value = idx;
+  loadGridded(idx);
+}
+
+function zarrStepForward() {
+  zarrPause();
+  const slider = document.getElementById("grid-time-slider");
+  let idx = Math.min(299, parseInt(slider.value) + 1);
+  slider.value = idx;
+  loadGridded(idx);
+}
+
+function zarrReset() {
+  zarrPause();
+  const slider = document.getElementById("grid-time-slider");
+  slider.value = 0;
+  loadGridded(0);
+}
+
+// === CANVAS HOVER & CLICK: Pixel Inspector + Time Series Probe ===
+function initZarrCanvasInteraction() {
+  const canvas = document.getElementById("zarrCanvas");
+  if (!canvas) return;
+
+  // Hover: show coordinate + value readout
+  canvas.addEventListener("mousemove", (e) => {
+    if (!zarrCurrentGridData) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const matrix = zarrCurrentGridData.grid;
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    const cellW = canvas.width / cols;
+    const cellH = canvas.height / rows;
+
+    const col = Math.floor(x / cellW);
+    const row = Math.floor(y / cellH);
+    const dataRow = rows - 1 - row; // un-flip
+
+    if (col < 0 || col >= cols || dataRow < 0 || dataRow >= rows) return;
+
+    const lats = zarrCurrentGridData.lats;
+    const lons = zarrCurrentGridData.lons;
+    const lat = lats[dataRow];
+    const lon = lons[col];
+    const val = matrix[dataRow][col];
+
+    const coordEl = document.getElementById("txt-inspector-coord");
+    const valEl = document.getElementById("txt-inspector-val");
+    if (coordEl) coordEl.textContent = `Lat: ${lat}° Lon: ${lon}°`;
+    if (valEl) valEl.textContent = val !== null ? `Val: ${val}` : "Val: N/A";
+  });
+
+  // Click: extract 25-year pixel time series
+  canvas.addEventListener("click", (e) => {
+    if (!zarrCurrentGridData) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const matrix = zarrCurrentGridData.grid;
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    const cellW = canvas.width / cols;
+    const cellH = canvas.height / rows;
+
+    const col = Math.floor(x / cellW);
+    const row = Math.floor(y / cellH);
+    const dataRow = rows - 1 - row;
+
+    if (col < 0 || col >= cols || dataRow < 0 || dataRow >= rows) return;
+
+    const lat = zarrCurrentGridData.lats[dataRow];
+    const lon = zarrCurrentGridData.lons[col];
+    const variable = document.getElementById("gridded-var-select").value || "ndvi";
+
+    loadPixelTimeSeries(variable, lat, lon);
+  });
+}
+
+// Fetch and render 300-month time series for a clicked grid cell
+async function loadPixelTimeSeries(variable, lat, lon) {
+  try {
+    const res = await fetch(`/gridded/timeseries?variable=${encodeURIComponent(variable)}&lat=${lat}&lon=${lon}`);
+    const data = await res.json();
+
+    const t = TRANSLATIONS[currentLang];
+
+    // Update probe panel header
+    const titleEl = document.getElementById("probe-panel-title");
+    if (titleEl) titleEl.textContent = t.probeTitle || "Grid Point Time Series Probe (2001–2025)";
+
+    const coordEl = document.getElementById("probe-panel-coords");
+    if (coordEl) coordEl.textContent = `Coordinate: ${data.lat}°N, ${data.lon}°E | ${data.long_name} (${data.units})`;
+
+    const slopeBadge = document.getElementById("probe-slope-badge");
+    if (slopeBadge) {
+      const sign = data.trend.slope_per_year > 0 ? "+" : "";
+      slopeBadge.textContent = `Slope: ${sign}${data.trend.slope_per_year} /yr`;
+    }
+    const sigBadge = document.getElementById("probe-sig-badge");
+    if (sigBadge) {
+      sigBadge.textContent = `p = ${data.trend.p_value} (${data.trend.significant ? "Sig" : "Not Sig"})`;
+    }
+    const statsBadge = document.getElementById("probe-stats-badge");
+    if (statsBadge) {
+      statsBadge.textContent = `Mean: ${data.summary.mean} | Min: ${data.summary.min} | Max: ${data.summary.max}`;
+    }
+
+    // Render Chart.js line chart
+    const labels = data.series.map(pt => pt.date.substring(0, 7));
+    const values = data.series.map(pt => pt.value);
+
+    const colors = getThemeChartColors();
+
+    if (zarrPixelChartInstance) zarrPixelChartInstance.destroy();
+
+    const ctx = document.getElementById("zarrPixelChart").getContext("2d");
+    zarrPixelChartInstance = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: `${data.long_name} (${data.units})`,
+          data: values,
+          borderColor: colors.yellowLine,
+          backgroundColor: colors.yellowBand,
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: true,
+          tension: 0.25,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: colors.tooltipBg,
+            titleColor: colors.tooltipTitle,
+            bodyColor: colors.tooltipBody,
+            borderColor: colors.tooltipBorder,
+            borderWidth: 1,
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: colors.tickColor, maxTicksLimit: 15, font: { size: 10 } },
+            grid: { color: colors.gridColor }
+          },
+          y: {
+            ticks: { color: colors.tickColor, font: { size: 10 } },
+            grid: { color: colors.gridColor }
+          }
+        }
+      }
+    });
+
+  } catch (err) {
+    console.error("Pixel time series error:", err);
+  }
+}
+
+// === MIRROR FINDER WITH LEADERBOARD & SHARED DRIVER ===
+async function runMirrorFinder() {
+  const d1 = document.getElementById("compare-d1-select").value || "Rajshahi";
+  const variable = document.getElementById("variable-select").value || "T2M";
+
+  try {
+    const res = await fetch(`/mirror-finder?district=${encodeURIComponent(d1)}&variable=${encodeURIComponent(variable)}`);
+    const mirror = await res.json();
+    lastMirrorResult = mirror;
+
+    // Automatically set district 2 to the mirror district
+    document.getElementById("compare-d2-select").value = mirror.mirror_district;
+    document.getElementById("compare-banner-summary").textContent = mirror.explanation;
+
+    // Render Top 5 Leaderboard
+    renderMirrorLeaderboard(mirror, variable);
+
+    // Render Shared Driver Card
+    renderSharedDriverCard(mirror);
+
+    // Reload comparison view
+    loadComparison();
+  } catch (err) {
+    console.error("Mirror finder error:", err);
+  }
+}
+
+function renderMirrorLeaderboard(mirror, variable) {
+  const tbody = document.getElementById("mirror-leaderboard-tbody");
+  if (!tbody || !mirror.top_pairs) return;
+
+  const t = TRANSLATIONS[currentLang];
+
+  // Update header
+  const titleEl = document.getElementById("txt-leaderboard-title");
+  if (titleEl) titleEl.textContent = t.leaderboardTitle || "Top 5 Strongest Mirror Pairs in Bangladesh";
+  const subEl = document.getElementById("txt-leaderboard-sub");
+  if (subEl) subEl.textContent = t.leaderboardSub || "Ranked by maximum slope divergence delta across 64 districts";
+  const varBadge = document.getElementById("txt-leaderboard-var");
+  if (varBadge) varBadge.textContent = `Variable: ${variable}`;
+
+  // Update table headers
+  const thIds = [
+    ["th-lb-rank", t.thLbRank], ["th-lb-target", t.thLbTarget], ["th-lb-mirror", t.thLbMirror],
+    ["th-lb-d1slope", t.thLbD1Slope], ["th-lb-d2slope", t.thLbD2Slope],
+    ["th-lb-delta", t.thLbDelta], ["th-lb-action", t.thLbAction]
+  ];
+  thIds.forEach(([id, txt]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = txt;
+  });
+
+  tbody.innerHTML = "";
+  mirror.top_pairs.forEach(pair => {
+    const tr = document.createElement("tr");
+    const rankBadge = pair.rank <= 3
+      ? `<span style="color:var(--accent-yellow); font-weight:800;">🏅 #${pair.rank}</span>`
+      : `<span style="font-weight:600;">#${pair.rank}</span>`;
+
+    const d1Sign = pair.district1_slope > 0 ? "+" : "";
+    const d2Sign = pair.district2_slope > 0 ? "+" : "";
+    const deltaColor = pair.delta_slope > 0.05 ? "var(--accent-yellow)" : "var(--text-main)";
+
+    tr.innerHTML = `
+      <td style="padding:9px 10px;">${rankBadge}</td>
+      <td style="padding:9px 10px; font-weight:600;">${pair.district1} <span style="color:var(--text-muted); font-size:0.72rem;">(${pair.district1_division})</span></td>
+      <td style="padding:9px 10px; font-weight:600;">${pair.district2} <span style="color:var(--text-muted); font-size:0.72rem;">(${pair.district2_division})</span></td>
+      <td style="padding:9px 10px; color:${pair.district1_slope > 0 ? 'var(--accent-yellow)' : 'var(--text-main)'}; font-weight:600;">${d1Sign}${pair.district1_slope}</td>
+      <td style="padding:9px 10px; color:${pair.district2_slope > 0 ? 'var(--accent-yellow)' : 'var(--text-main)'}; font-weight:600;">${d2Sign}${pair.district2_slope}</td>
+      <td style="padding:9px 10px; color:${deltaColor}; font-weight:700;">${pair.delta_slope}</td>
+      <td style="padding:9px 10px;">
+        <button class="map-popup-btn" onclick="loadMirrorPair('${pair.district1}','${pair.district2}')">${t.btnComparePair || "⚖️ Load Pair"}</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderSharedDriverCard(mirror) {
+  const card = document.getElementById("shared-driver-card");
+  if (!card || !mirror.shared_driver) return;
+  card.style.display = "block";
+
+  const driver = mirror.shared_driver;
+  const t = TRANSLATIONS[currentLang];
+
+  document.getElementById("driver-badge").textContent = t.driverBadge || "Scientific Driver";
+  document.getElementById("driver-title-en").textContent = driver.title_en;
+  document.getElementById("driver-title-bn").textContent = driver.title_bn;
+
+  const isEn = currentLang === "en";
+  document.getElementById("driver-narrative-en").textContent = isEn ? driver.mechanism_en : driver.mechanism_bn;
+  document.getElementById("driver-narrative-bn").textContent = isEn ? driver.mechanism_bn : driver.mechanism_en;
+
+  const factorsList = document.getElementById("driver-factors-list");
+  if (factorsList && driver.key_factors) {
+    factorsList.innerHTML = "";
+    driver.key_factors.forEach(f => {
+      const li = document.createElement("li");
+      li.textContent = f;
+      factorsList.appendChild(li);
+    });
+  }
+
+  // Wire "Show Dipole on Map" button
+  const mapBtn = document.getElementById("driver-view-map-btn");
+  if (mapBtn) {
+    const btnSpan = document.getElementById("txt-driver-map-btn");
+    if (btnSpan) btnSpan.textContent = t.btnDriverMap || "🗺️ Show Dipole on Map";
+    mapBtn.onclick = () => drawDipoleArc(mirror.target_district, mirror.mirror_district);
+  }
+}
+
+// One-click leaderboard pair loading
+function loadMirrorPair(d1, d2) {
+  document.getElementById("compare-d1-select").value = d1;
+  document.getElementById("compare-d2-select").value = d2;
+  loadComparison();
+  drawDipoleArc(d1, d2);
+}
+
+// === MAP: GEODESIC DIPOLE ARC ===
+function drawDipoleArc(d1Name, d2Name) {
+  // Remove existing dipole
+  clearDipoleArc();
+
+  const m1 = districtMarkers[d1Name];
+  const m2 = districtMarkers[d2Name];
+  if (!m1 || !m2 || !mapInstance) return;
+
+  const latlng1 = m1.getLatLng();
+  const latlng2 = m2.getLatLng();
+
+  dipoleLine = L.polyline([latlng1, latlng2], {
+    color: COLOR_YELLOW,
+    weight: 3,
+    opacity: 0.85,
+    dashArray: "8, 8",
+    className: "leaflet-dipole-arc"
+  }).addTo(mapInstance);
+
+  // Show clear button
+  const clearBtn = document.getElementById("map-clear-dipole-btn");
+  if (clearBtn) clearBtn.style.display = "inline-flex";
+
+  // Fit map to show both districts
+  const bounds = L.latLngBounds([latlng1, latlng2]).pad(0.2);
+  mapInstance.fitBounds(bounds, { animate: true, duration: 0.5 });
+
+  // Highlight both markers
+  [m1, m2].forEach(m => {
+    m.setStyle({ radius: 11, weight: 3, color: COLOR_YELLOW, fillOpacity: 1.0 });
+  });
+
+  // Switch to District Explorer tab to show map
+  const singleTab = document.querySelector('[data-tab="tab-single"]');
+  if (singleTab) singleTab.click();
+}
+
+function clearDipoleArc() {
+  if (dipoleLine && mapInstance) {
+    mapInstance.removeLayer(dipoleLine);
+    dipoleLine = null;
+  }
+  const clearBtn = document.getElementById("map-clear-dipole-btn");
+  if (clearBtn) clearBtn.style.display = "none";
+}
+
+// === MAP: DIVISION FILTER ===
+function applyDivisionFilter(division) {
+  if (!currentDistricts || !mapInstance) return;
+
+  Object.values(districtMarkers).forEach(marker => {
+    if (division === "all") {
+      marker.addTo(mapInstance);
+    } else {
+      if (marker._districtData && marker._districtData.division === division) {
+        marker.addTo(mapInstance);
+      } else {
+        mapInstance.removeLayer(marker);
+      }
+    }
+  });
+
+  // Zoom to filtered division bounds
+  if (division !== "all") {
+    const divDistricts = currentDistricts.filter(d => d.division === division);
+    if (divDistricts.length > 0) {
+      const bounds = L.latLngBounds(divDistricts.map(d => [d.lat, d.lon])).pad(0.15);
+      mapInstance.fitBounds(bounds, { animate: true });
+    }
+  } else {
+    mapInstance.setView([23.8, 90.3], 7, { animate: true });
+  }
+}
+
+// === MAP: METRIC MODE COLORING (Slope / Significance / Robustness) ===
+async function applyMapMetricMode(mode) {
+  const variable = document.getElementById("variable-select").value || "T2M";
+
+  try {
+    let fdrList;
+    if (fdrCache.has(variable)) {
+      fdrList = fdrCache.get(variable);
+    } else {
+      const res = await fetch(`/map/fdr?variable=${variable}`);
+      fdrList = await res.json();
+      fdrCache.set(variable, fdrList);
+    }
+    mapMetricData = fdrList;
+
+    const isLight = currentTheme === "light";
+
+    fdrList.forEach(item => {
+      const marker = districtMarkers[item.district];
+      if (!marker) return;
+
+      if (mode === "slope") {
+        // Color by slope magnitude: strong yellow = high positive, white = negative
+        const absSlope = Math.abs(item.slope_per_year);
+        const intensity = Math.min(1, absSlope / 0.1);
+        if (item.slope_per_year > 0) {
+          marker.setStyle({
+            fillColor: COLOR_YELLOW,
+            color: isLight ? "#d97706" : COLOR_YELLOW,
+            weight: 1.5 + intensity * 2,
+            radius: 6 + intensity * 5,
+            fillOpacity: 0.6 + intensity * 0.35,
+          });
+        } else {
+          marker.setStyle({
+            fillColor: COLOR_WHITE,
+            color: isLight ? "#475569" : "#a3a3a3",
+            weight: 1.5 + intensity * 2,
+            radius: 6 + intensity * 5,
+            fillOpacity: 0.6 + intensity * 0.35,
+          });
+        }
+        marker.setTooltipContent(`<b>${item.district}</b><br>Slope: ${item.slope_per_year > 0 ? '+' : ''}${item.slope_per_year}/yr<br>p = ${item.p_value}`);
+
+      } else if (mode === "significance") {
+        const sig = item.significant_fdr || item.significant_raw;
+        marker.setStyle({
+          fillColor: sig ? COLOR_YELLOW : COLOR_CHARCOAL,
+          color: sig ? (isLight ? "#d97706" : COLOR_YELLOW_BRIGHT) : "#333333",
+          weight: sig ? 2.5 : 1,
+          radius: sig ? 9 : 6,
+          fillOpacity: sig ? 0.9 : 0.4,
+        });
+        marker.setTooltipContent(`<b>${item.district}</b><br>p = ${item.p_value}<br>${sig ? "✅ Significant (p < 0.05)" : "❌ Not Significant"}`);
+
+      } else if (mode === "robustness") {
+        // Robust = significant + slope confirms direction; Fragile = not significant
+        const sig = item.significant_fdr || item.significant_raw;
+        let tier, tierColor, tierRadius;
+        if (sig && Math.abs(item.slope_per_year) > 0.02) {
+          tier = "Robust"; tierColor = COLOR_YELLOW; tierRadius = 10;
+        } else if (sig) {
+          tier = "Moderate"; tierColor = isLight ? "#f59e0b" : "#fef08a"; tierRadius = 8;
+        } else {
+          tier = "Fragile"; tierColor = COLOR_CHARCOAL; tierRadius = 5;
+        }
+        marker.setStyle({
+          fillColor: tierColor,
+          color: tier === "Robust" ? (isLight ? "#d97706" : COLOR_YELLOW) : "#555555",
+          weight: tier === "Robust" ? 3 : 1,
+          radius: tierRadius,
+          fillOpacity: tier === "Fragile" ? 0.35 : 0.85,
+        });
+        marker.setTooltipContent(`<b>${item.district}</b><br>Tier: ${tier}<br>Slope: ${item.slope_per_year > 0 ? '+' : ''}${item.slope_per_year}/yr`);
+      }
+    });
+
+  } catch (err) {
+    console.error("Map metric mode error:", err);
+  }
+}
+
+// === MAP POPUP ACTION HANDLERS (called from popup HTML) ===
+function popupInspectTrend(districtName) {
+  document.getElementById("district-select").value = districtName;
+  loadTrend();
+  if (mapInstance) mapInstance.closePopup();
+}
+
+function popupSetDistrict1(districtName) {
+  document.getElementById("compare-d1-select").value = districtName;
+  // Switch to compare tab
+  const compTab = document.querySelector('[data-tab="tab-compare"]');
+  if (compTab) compTab.click();
+  if (mapInstance) mapInstance.closePopup();
+}
+
+function popupSetDistrict2(districtName) {
+  document.getElementById("compare-d2-select").value = districtName;
+  const compTab = document.querySelector('[data-tab="tab-compare"]');
+  if (compTab) compTab.click();
+  if (mapInstance) mapInstance.closePopup();
 }

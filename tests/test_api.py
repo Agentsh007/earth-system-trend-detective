@@ -166,7 +166,7 @@ def test_ml_forecast_endpoint():
 
 
 def test_mirror_finder_endpoint():
-    """Test Mirror Finder opposite-trend detection across Bangladesh."""
+    """Test Mirror Finder opposite-trend detection across Bangladesh with leaderboard and driver card."""
     res = client.get("/mirror-finder?district=Rajshahi&variable=T2M")
     assert res.status_code == 200
     data = res.json()
@@ -174,6 +174,28 @@ def test_mirror_finder_endpoint():
     assert "mirror_district" in data
     assert "divergence_delta" in data
     assert len(data["explanation"]) > 0
+    assert "top_pairs" in data
+    assert len(data["top_pairs"]) == 5
+    assert data["top_pairs"][0]["rank"] == 1
+    assert "shared_driver" in data
+    assert "title_en" in data["shared_driver"]
+    assert "title_bn" in data["shared_driver"]
+    assert "mechanism_en" in data["shared_driver"]
+    assert "mechanism_bn" in data["shared_driver"]
+
+
+def test_gridded_timeseries_endpoint():
+    """Test gridded Zarr point-and-click time series extraction."""
+    res = client.get("/gridded/timeseries?variable=ndvi&lat=23.8&lon=90.3")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["variable"] == "ndvi"
+    assert data["n_steps"] == 300
+    assert len(data["series"]) == 300
+    assert "trend" in data
+    assert "slope_per_year" in data["trend"]
+    assert "summary" in data
+    assert "mean" in data["summary"]
 
 
 def test_window_sensitivity_endpoint():
