@@ -68,8 +68,8 @@ from src.data.loader import (
 )
 
 app = FastAPI(
-    title="Earth System Trend Detective API",
-    description="Offline-first Earth-system trend investigation tool for Bangladesh (NASA Space Apps Challenge 2026)",
+    title="EarthScope API",
+    description="Earth_Scope: Offline-first interactive Earth-observation trend investigation platform (NASA Space Apps Challenge 2026)",
     version="1.0.0",
 )
 

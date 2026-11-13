@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Earth System Trend Detective | Bangladesh</title>
+  <title>EarthScope | Turning NASA Earth-Observation Data into Evidence People Can Trust</title>
   
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -17,112 +17,240 @@
 </head>
 <body>
 
-  <!-- Top Navigation Header -->
+  <!-- Top Navigation Header (Matching Images 1, 2, 3) -->
   <header class="header">
-    <div class="brand-container">
-      <div class="logo-badge">NASA</div>
-      <div class="title-group">
-        <h1 id="txt-app-title">Earth System Trend Detective</h1>
-        <p id="txt-app-subtitle">Offline-First Bangladesh Climate & Remote Sensing Trend Investigation</p>
+    <div class="header-left">
+      <!-- Sidebar Toggle Hamburger -->
+      <button class="btn-hamburger" id="btn-toggle-sidebar" title="Toggle Navigation Sidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+
+      <div class="brand-container">
+        <div class="brand-logo-symbol">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+        </div>
+        <div class="title-group">
+          <h1 id="txt-app-title">Earth<span style="color:var(--accent-yellow);">Scope</span></h1>
+          <div class="breadcrumb-trail">
+            <span class="bc-country" id="txt-bc-country">Country</span>
+            <span class="bc-sep">/</span>
+            <span class="bc-region" id="txt-bc-region">Bangladesh</span>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="header-status">
-      <!-- Theme Toggle Button -->
+
+    <!-- Center Search Bar (Image 1) -->
+    <div class="header-center">
+      <div class="header-search-wrapper">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="header-district-search" placeholder="Search 64 districts (e.g. Sylhet, Rajshahi, Dhaka)..." autocomplete="off">
+        <div id="search-autocomplete-list" class="search-autocomplete-dropdown"></div>
+      </div>
+    </div>
+
+    <!-- Right Header Tools & Official NASA Space Apps Badge -->
+    <div class="header-right">
+      <!-- Notification Icon with Badge -->
+      <button class="header-icon-btn" id="header-notif-btn" title="5 Climate Anomaly Alerts Detected in Bangladesh">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        <span class="notif-badge">5</span>
+      </button>
+
+      <!-- Theme Toggle -->
       <button class="btn-tool" id="theme-toggle-btn" title="Toggle Light/Dark Theme">
         <span id="theme-icon">☀️</span> <span id="theme-text">Light Mode</span>
       </button>
 
-      <!-- Language Toggle Button -->
+      <!-- Language Toggle -->
       <button class="btn-tool" id="lang-toggle-btn" title="Switch Language (English / বাংলা)">
         <span id="lang-icon">🌐</span> <span id="lang-text">বাংলা</span>
       </button>
 
-      <span class="status-pill" id="carto-badge" title="CARTO Basemap integration active with authenticated key">
-        <span class="dot"></span> <span id="txt-carto-badge">CARTO Basemap Active</span>
+      <!-- Status Pills -->
+      <span class="status-pill" id="carto-badge" title="CARTO Basemap active">
+        <span class="dot"></span> <span id="txt-carto-badge">CARTO Active</span>
       </span>
-      <span class="status-pill offline" id="offline-badge">
-        <span class="dot"></span> <span id="txt-offline-badge">OFFLINE=1 (Cache Only)</span>
+      <span class="status-pill offline" id="offline-badge" title="Local Parquet + Zarr cache">
+        <span class="dot"></span> <span id="txt-offline-badge">OFFLINE=1</span>
       </span>
-      <button class="btn-provenance" id="open-drawer-btn" title="View dataset provenance and raw numbers">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-        <span id="txt-drawer-btn">Provenance Drawer</span>
+
+      <!-- Provenance Drawer Trigger -->
+      <button class="btn-provenance" id="open-drawer-btn" title="View dataset provenance and exact JSON">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        <span id="txt-drawer-btn">Provenance</span>
       </button>
+
+      <!-- NASA International Space Apps Challenge Badge (Images 1, 2, 3) -->
+      <div class="nasa-spaceapps-badge" title="NASA International Space Apps Challenge 2026">
+        <div class="spaceapps-emblem-ring">
+          <svg width="28" height="28" viewBox="0 0 100 100" class="spaceapps-svg">
+            <circle cx="50" cy="50" r="46" fill="none" stroke="var(--accent-yellow)" stroke-width="3" stroke-dasharray="4 2"/>
+            <path d="M50 20 C65 20, 75 35, 75 50 C75 65, 65 80, 50 80 C35 80, 25 65, 25 50 C25 35, 35 20, 50 20" fill="none" stroke="var(--text-main)" stroke-width="3"/>
+            <circle cx="50" cy="50" r="10" fill="var(--accent-yellow)"/>
+            <circle cx="68" cy="40" r="4" fill="var(--text-main)"/>
+          </svg>
+        </div>
+        <div class="spaceapps-title-block">
+          <span class="spaceapps-top">NASA</span>
+          <span class="spaceapps-mid">INTERNATIONAL</span>
+          <span class="spaceapps-bot">SPACE APPS CHALLENGE</span>
+        </div>
+      </div>
     </div>
   </header>
 
-  <!-- Navigation Tabs -->
+  <!-- Main Navigation Tabs -->
   <nav class="nav-tabs">
-    <button class="tab-btn active" data-tab="tab-single" id="tab-btn-single">District Explorer</button>
-    <button class="tab-btn" data-tab="tab-forecast" id="tab-btn-forecast">ML Forecasting</button>
-    <button class="tab-btn" data-tab="tab-compare" id="tab-btn-compare">Comparison & Mirror Finder</button>
-    <button class="tab-btn" data-tab="tab-gridded" id="tab-btn-gridded">Gridded Zarr Explorer</button>
-    <button class="tab-btn" data-tab="tab-methods" id="tab-btn-methods">Methods & Provenance</button>
+    <button class="tab-btn active" data-tab="tab-single" id="tab-btn-single">🗺️ Country Explorer (GIS Map)</button>
+    <button class="tab-btn" data-tab="tab-compare" id="tab-btn-compare">⚖️ Environmental Dashboard (Dual Comparison)</button>
+    <button class="tab-btn" data-tab="tab-forecast" id="tab-btn-forecast">🔮 ML Forecasting</button>
+    <button class="tab-btn" data-tab="tab-gridded" id="tab-btn-gridded">🌐 Gridded Zarr Explorer</button>
+    <button class="tab-btn" data-tab="tab-methods" id="tab-btn-methods">📜 Methods & Provenance</button>
   </nav>
 
-  <!-- Main Container -->
-  <div class="app-container">
+  <!-- Application Body Layout -->
+  <div class="app-container" id="main-app-container">
 
-    <!-- Sidebar Controls -->
-    <aside class="controls-sidebar">
-      <div class="control-card">
-        <h3 id="txt-controls-title">Investigation Controls</h3>
+    <!-- Left Collapsible Sidebar (Matching Image 1) -->
+    <aside class="controls-sidebar" id="app-sidebar">
+      <!-- Sidebar Sub-Tabs: Filters / Layers -->
+      <div class="sidebar-tabs-row">
+        <button class="sidebar-subtab active" data-subtab="filters" id="btn-subtab-filters">Filters</button>
+        <button class="sidebar-subtab" data-subtab="layers" id="btn-subtab-layers">Layers</button>
+      </div>
 
-        <div class="form-group">
-          <label for="district-select" id="txt-label-district">District (64 Total):</label>
-          <select id="district-select">
-            <!-- Dynamically populated -->
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="variable-select" id="txt-label-variable">Environmental Variable:</label>
-          <select id="variable-select">
-            <option value="T2M" selected id="opt-var-t2m">Temperature at 2m (T2M) [°C]</option>
-            <option value="PRECTOTCORR" id="opt-var-precip">Precipitation (PRECTOTCORR) [mm/day]</option>
-            <option value="ALLSKY_SFC_SW_DWN" id="opt-var-solar">Solar Radiation (SW Downward) [MJ/m²]</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label id="txt-label-period">Time Period (2001 - 2025):</label>
-          <div class="date-range-row">
-            <div>
-              <label for="start-date" style="font-size:0.7rem;" id="txt-label-start">Start Date</label>
-              <input type="date" id="start-date" value="2001-01-01" min="2001-01-01" max="2025-12-31">
-            </div>
-            <div>
-              <label for="end-date" style="font-size:0.7rem;" id="txt-label-end">End Date</label>
-              <input type="date" id="end-date" value="2025-12-31" min="2001-01-01" max="2025-12-31">
-            </div>
+      <!-- Filters Pane -->
+      <div class="sidebar-subpane active" id="pane-filters">
+        <!-- Region / Country Filter -->
+        <div class="control-card">
+          <div class="control-header-toggle">
+            <span class="ch-title" id="txt-filter-country-title">Country &amp; Region</span>
+          </div>
+          <div class="form-group">
+            <label for="district-select" id="txt-label-district">Selected District (64 Total):</label>
+            <select id="district-select">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="division-select-quick" id="txt-label-division">Division Filter:</label>
+            <select id="division-select-quick">
+              <option value="all" selected>All Divisions (64 Districts)</option>
+              <option value="Dhaka">Dhaka Division (13)</option>
+              <option value="Rajshahi">Rajshahi Division (8)</option>
+              <option value="Chattogram">Chattogram Division (11)</option>
+              <option value="Khulna">Khulna Division (10)</option>
+              <option value="Sylhet">Sylhet Division (4)</option>
+              <option value="Rangpur">Rangpur Division (8)</option>
+              <option value="Barishal">Barishal Division (6)</option>
+              <option value="Mymensingh">Mymensingh Division (4)</option>
+            </select>
           </div>
         </div>
 
-        <button class="btn-primary" id="analyze-btn" style="margin-top: 0.5rem;">
-          <span id="txt-btn-analyze">Run Trend Analysis</span>
-        </button>
+        <!-- Environmental Variable & Time Period -->
+        <div class="control-card">
+          <div class="control-header-toggle">
+            <span class="ch-title" id="txt-filter-type-title">Type Filters (Variables)</span>
+          </div>
+          <div class="form-group">
+            <label for="variable-select" id="txt-label-variable">NASA Variable:</label>
+            <select id="variable-select">
+              <option value="T2M" selected id="opt-var-t2m">Surface Temperature (T2M) [°C]</option>
+              <option value="PRECTOTCORR" id="opt-var-precip">Precipitation (PRECTOTCORR) [mm/day]</option>
+              <option value="ALLSKY_SFC_SW_DWN" id="opt-var-solar">Solar Radiation (SW Downward) [MJ/m²]</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label id="txt-label-period">Time Period (2001 - 2025):</label>
+            <div class="date-range-row">
+              <div>
+                <label for="start-date" style="font-size:0.7rem;" id="txt-label-start">Start Date</label>
+                <input type="date" id="start-date" value="2001-01-01" min="2001-01-01" max="2025-12-31">
+              </div>
+              <div>
+                <label for="end-date" style="font-size:0.7rem;" id="txt-label-end">End Date</label>
+                <input type="date" id="end-date" value="2025-12-31" min="2001-01-01" max="2025-12-31">
+              </div>
+            </div>
+          </div>
+
+          <!-- Anomaly Trend Toggle Switch (Image 1) -->
+          <div class="form-group switch-group">
+            <label for="toggle-anomaly-mode" class="switch-label">
+              <span id="txt-toggle-anomaly">Anomaly Trend Mode</span>
+              <span class="help-tooltip" title="Show departures from 2001–2005 baseline average instead of absolute values">ⓘ</span>
+            </label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-anomaly-mode">
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <button class="btn-primary" id="analyze-btn" style="margin-top: 0.5rem;">
+            <span id="txt-btn-analyze">Run Trend Analysis</span>
+          </button>
+        </div>
+
+        <!-- Product Categories (Image 1) -->
+        <div class="control-card">
+          <div class="control-header-toggle">
+            <span class="ch-title" id="txt-categories-title">NASA Product Categories</span>
+          </div>
+          <div class="checkbox-list">
+            <label class="checkbox-item">
+              <input type="checkbox" checked disabled>
+              <span>NASA POWER Daily Point (MERRA-2)</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" checked disabled>
+              <span>NASA MODIS NDVI (MOD13Q1)</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" checked disabled>
+              <span>NASA GPM IMERG Precipitation</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" checked disabled>
+              <span>NASA JPL GRACE / GRACE-FO Mascon</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Export Evidence Card -->
+        <div class="control-card">
+          <h3 id="txt-export-title">Export Evidence</h3>
+          <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.75rem;" id="txt-export-desc">
+            Download filtered dataset with full scientific provenance and Theil-Sen fit values.
+          </p>
+          <div class="export-group">
+            <button class="btn-secondary" id="export-csv-btn">Export CSV</button>
+            <button class="btn-secondary" id="export-geojson-btn">Export GeoJSON</button>
+          </div>
+        </div>
       </div>
 
-      <div class="control-card">
-        <h3 id="txt-export-title">Export Evidence</h3>
-        <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.75rem;" id="txt-export-desc">
-          Download filtered dataset with full scientific provenance and Theil-Sen fit values.
-        </p>
-        <div class="export-group">
-          <button class="btn-secondary" id="export-csv-btn">Export CSV</button>
-          <button class="btn-secondary" id="export-geojson-btn">Export GeoJSON</button>
-        </div>
-      </div>
-
-      <div class="control-card">
-        <h3 id="txt-chart-options-title">Chart Display Options</h3>
-        <div class="form-group">
-          <label><input type="checkbox" id="toggle-ci" checked> <span id="txt-toggle-ci">Show 95% Confidence Band</span></label>
-        </div>
-        <div class="form-group">
-          <label><input type="checkbox" id="toggle-decomp"> <span id="txt-toggle-decomp">Show Seasonal Decomposition</span></label>
-        </div>
-        <div class="form-group">
-          <label><input type="checkbox" id="toggle-fdr"> <span id="txt-toggle-fdr">Apply Benjamini-Hochberg FDR</span></label>
+      <!-- Layers Pane -->
+      <div class="sidebar-subpane" id="pane-layers" style="display:none;">
+        <div class="control-card">
+          <h3 id="txt-layers-title">Map Layer Configuration</h3>
+          <div class="form-group">
+            <label><input type="checkbox" id="toggle-layer-districts" checked> <span>District Centroids</span></label>
+          </div>
+          <div class="form-group">
+            <label><input type="checkbox" id="toggle-layer-dipole" checked> <span>Mirror Dipole Arcs</span></label>
+          </div>
+          <div class="form-group">
+            <label><input type="checkbox" id="toggle-ci" checked> <span id="txt-toggle-ci">Show 95% Confidence Band</span></label>
+          </div>
+          <div class="form-group">
+            <label><input type="checkbox" id="toggle-decomp"> <span id="txt-toggle-decomp">Seasonal Decomposition</span></label>
+          </div>
+          <div class="form-group">
+            <label><input type="checkbox" id="toggle-fdr"> <span id="txt-toggle-fdr">Benjamini-Hochberg FDR</span></label>
+          </div>
         </div>
       </div>
     </aside>
@@ -130,45 +258,140 @@
     <!-- Main Content Area -->
     <main class="content-area">
 
-      <!-- TAB 1: District Explorer -->
+      <!-- =================================================================== -->
+      <!-- TAB 1: Country Explorer (GIS Map + Floating Trend Panel - Image 1) -->
+      <!-- =================================================================== -->
       <section id="tab-single" class="tab-pane active">
-        <!-- Feature Header Banner (2-3 Sentences Detail) -->
+        <!-- Feature Header Banner (Mission Statement) -->
         <div class="feature-banner">
-          <span class="feature-banner-badge" id="banner-single-badge">Spatial & Temporal Analysis</span>
-          <h2 class="feature-banner-title" id="banner-single-title">District Trend Explorer (64 Districts)</h2>
+          <span class="feature-banner-badge" id="banner-single-badge">NASA Earth-Observation Evidence Platform</span>
+          <h2 class="feature-banner-title" id="banner-single-title">EarthScope: Evidence People Can Trust</h2>
           <p class="feature-banner-desc" id="banner-single-desc">
-            Interactive spatial and temporal trend detector for all 64 districts in Bangladesh across 2001–2025. Combines non-parametric Mann-Kendall monotonic testing with Theil-Sen robust slope estimation and additive seasonal decomposition. Click any district on the map or use the sidebar controls to inspect climate trends with full scientific data provenance.
+            Turning NASA Earth-observation data into evidence people can trust. Satellites and models give us plenty of data, but a rising line on a chart does not show whether a change is real, how large it is, or whether it differs from place to place. EarthScope lets users explore trends region by region across Bangladesh, estimating the rate of change with Sen’s slope and testing statistical significance with the Mann–Kendall test.
           </p>
         </div>
 
-        <!-- Stat Cards Grid -->
-        <div class="stats-grid">
+        <!-- GIS Spatial Explorer Layout: Map + Floating Time-Series Widget -->
+        <div class="gis-explorer-grid">
+          
+          <!-- Center Map Container -->
+          <div class="gis-map-card">
+            <!-- Map Toolbar Controls -->
+            <div class="gis-map-toolbar">
+              <div class="map-toolbar-left">
+                <span class="map-title-label" id="txt-map-title">Bangladesh Spatial Inspector</span>
+                <span class="map-badge-counter" id="active-district-counter">64 Districts Active</span>
+              </div>
+              <div class="map-toolbar-right">
+                <select id="map-division-filter" title="Filter by administrative division">
+                  <option value="all" selected>All Divisions</option>
+                  <option value="Dhaka">Dhaka Division</option>
+                  <option value="Rajshahi">Rajshahi Division</option>
+                  <option value="Chattogram">Chattogram Division</option>
+                  <option value="Khulna">Khulna Division</option>
+                  <option value="Sylhet">Sylhet Division</option>
+                  <option value="Rangpur">Rangpur Division</option>
+                  <option value="Barishal">Barishal Division</option>
+                  <option value="Mymensingh">Mymensingh Division</option>
+                </select>
+
+                <select id="map-metric-mode" title="Change district marker styling metric">
+                  <option value="slope" selected>Metric: Sen's Slope Rate</option>
+                  <option value="significance">Metric: Significance (p &lt; 0.05)</option>
+                  <option value="robustness">Metric: Robustness Tier</option>
+                </select>
+
+                <button class="btn-tool-sm" id="map-clear-dipole-btn" style="display:none;">Clear Dipole</button>
+                <button class="btn-tool-sm" id="map-reset-zoom-btn" title="Reset Map View">🔍 Reset</button>
+              </div>
+            </div>
+
+            <!-- Leaflet Map Canvas -->
+            <div id="map-container"></div>
+
+            <!-- Map Legend Strip -->
+            <div class="map-bottom-legend">
+              <div class="legend-item"><span class="legend-circle" style="background:#facc15; border:1px solid #ffffff;"></span> <span id="txt-legend-inc">Increasing Trend</span></div>
+              <div class="legend-item"><span class="legend-circle" style="background:#ffffff; border:1px solid #737373;"></span> <span id="txt-legend-dec">Decreasing Trend</span></div>
+              <div class="legend-item"><span class="legend-circle" style="background:#525252;"></span> <span id="txt-legend-none">No Trend / Noise</span></div>
+              <div class="legend-hint" id="txt-map-hint">💡 Click any district circle on the map to inspect or open full trend estimates.</div>
+            </div>
+          </div>
+
+          <!-- Right Floating / Docked Time-Series Trend Widget (Image 1) -->
+          <div class="gis-trend-dock">
+            <div class="dock-header">
+              <h3 id="txt-dock-title">Time-Series Trend</h3>
+              <span class="dock-district-tag" id="dock-district-name">Rajshahi</span>
+            </div>
+
+            <!-- Top Timeline Scrubber Slider (Image 1) -->
+            <div class="dock-slider-row">
+              <div class="dock-slider-meta">
+                <span class="dock-meta-label">Timeline Range:</span>
+                <span class="dock-meta-val" id="dock-period-display">2001 – 2025 (25 Years)</span>
+              </div>
+              <input type="range" id="dock-timeline-slider" min="2005" max="2025" value="2025" step="1">
+              <div class="dock-slider-ticks">
+                <span>2001</span>
+                <span>2010</span>
+                <span>2020</span>
+                <span>2025</span>
+              </div>
+            </div>
+
+            <!-- Key Metric Chips -->
+            <div class="dock-metrics-grid">
+              <div class="dock-metric-chip">
+                <div class="dm-label">Sen's Slope</div>
+                <div class="dm-val" id="dock-stat-slope">+0.031</div>
+                <div class="dm-sub" id="dock-stat-units">°C / year</div>
+              </div>
+              <div class="dock-metric-chip">
+                <div class="dm-label">Mann-Kendall</div>
+                <div class="dm-val" id="dock-stat-p">p = 0.0003</div>
+                <div class="dm-sub" id="dock-stat-sig">Significant (p &lt; 0.05)</div>
+              </div>
+            </div>
+
+            <!-- Mini Sparkline Preview -->
+            <div class="dock-chart-wrapper">
+              <canvas id="dockSparklineChart"></canvas>
+            </div>
+
+            <!-- Primary Action Button: Opens Image 2 Detailed Modal -->
+            <button class="btn-primary" id="open-trend-modal-btn" style="width:100%; margin-top:0.75rem;">
+              <span>📊 Open Trend Estimates (Deep-Dive)</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Top Stat Cards (Preserved for Instant Full Visibility) -->
+        <div class="stats-grid" style="margin-top:1.5rem;">
           <div class="stat-card warm">
             <div class="stat-label" id="txt-stat-slope-label">Theil-Sen Slope</div>
             <div class="stat-value" id="stat-slope">+0.031</div>
             <div class="stat-sub" id="stat-slope-units">degC per year</div>
           </div>
-
           <div class="stat-card gold">
             <div class="stat-label" id="txt-stat-ci-label">95% Confidence Interval</div>
             <div class="stat-value" id="stat-ci">[0.014, 0.048]</div>
             <div class="stat-sub" id="txt-stat-ci-sub">Rank-based exact bounds</div>
           </div>
-
           <div class="stat-card green">
             <div class="stat-label" id="txt-stat-mk-label">Mann-Kendall Test</div>
             <div class="stat-value" id="stat-mk">Z = 3.61</div>
             <div class="stat-sub" id="stat-p-val">p = 0.0003 (S = 41230)</div>
           </div>
-
           <div class="stat-card">
-            <div class="stat-label" id="txt-stat-obs-label">Observations & QA/QC</div>
+            <div class="stat-label" id="txt-stat-obs-label">Observations &amp; QA/QC</div>
             <div class="stat-value" id="stat-n-obs">9,131</div>
             <div class="stat-sub" id="stat-qa-qc">Coverage: 100% | Status: Passed</div>
           </div>
         </div>
 
-        <!-- Baseline-to-Recent Comparison Bar (Section 4 & 7.3) -->
+        <!-- Baseline-to-Recent Comparison Bar -->
         <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0.75rem 1rem; margin-top:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; font-size:0.82rem;">
           <div>
             <strong style="color:var(--accent-yellow);" id="txt-net-change-label">Total Period Net Change:</strong>
@@ -181,7 +404,7 @@
           </button>
         </div>
 
-        <!-- Window Sensitivity Table (Section 11) -->
+        <!-- Window Sensitivity Table -->
         <div id="sensitivity-panel" style="display:none; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:1rem; margin-top:0.5rem;">
           <h4 style="font-size:0.8rem; text-transform:uppercase; color:var(--accent-yellow); margin-bottom:0.5rem;" id="txt-sens-title">
             Time Window Sensitivity Analysis (Robustness Check)
@@ -204,71 +427,6 @@
               <!-- Dynamically populated -->
             </tbody>
           </table>
-        </div>
-
-        <!-- View Grid: Map & Chart -->
-        <div class="view-grid" style="margin-top: 1.5rem;">
-          
-          <!-- District Map Panel -->
-          <div class="panel-card">
-            <div class="panel-header">
-              <div class="panel-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
-                <span id="txt-spatial-inspector">Bangladesh Spatial Inspector</span>
-              </div>
-              <div class="panel-legend">
-                <div class="legend-item"><span class="legend-circle" style="background:#facc15; border:1px solid #ffffff;"></span> <span id="txt-legend-inc">Increasing</span></div>
-                <div class="legend-item"><span class="legend-circle" style="background:#ffffff; border:1px solid #737373;"></span> <span id="txt-legend-dec">Decreasing</span></div>
-                <div class="legend-item"><span class="legend-circle" style="background:#525252;"></span> <span id="txt-legend-none">No Trend</span></div>
-              </div>
-            </div>
-
-            <!-- Interactive Map Toolbar: Division Filter & Metric Modes -->
-            <div class="map-toolbar">
-              <select id="map-division-filter">
-                <option value="all" selected>All Divisions (64 Districts)</option>
-                <option value="Dhaka">Dhaka Division (13)</option>
-                <option value="Rajshahi">Rajshahi Division (8)</option>
-                <option value="Chattogram">Chattogram Division (11)</option>
-                <option value="Khulna">Khulna Division (10)</option>
-                <option value="Sylhet">Sylhet Division (4)</option>
-                <option value="Rangpur">Rangpur Division (8)</option>
-                <option value="Barishal">Barishal Division (6)</option>
-                <option value="Mymensingh">Mymensingh Division (4)</option>
-              </select>
-
-              <select id="map-metric-mode">
-                <option value="slope" selected>Metric: Sen's Slope Rate</option>
-                <option value="significance">Metric: Significance (p &lt; 0.05)</option>
-                <option value="robustness">Metric: Robustness Tier</option>
-              </select>
-
-              <button class="btn-secondary" id="map-clear-dipole-btn" style="display:none; padding:0.35rem 0.6rem; font-size:0.75rem;">
-                <span id="txt-clear-dipole">Clear Dipole Arc</span>
-              </button>
-            </div>
-
-            <div id="map-container"></div>
-            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;" id="txt-map-hint">
-              Click any district circle to inspect trend statistics, load in inspector, or launch Mirror Finder.
-            </p>
-          </div>
-
-          <!-- Time-Series Chart Panel -->
-          <div class="panel-card">
-            <div class="panel-header">
-              <div class="panel-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                <span id="txt-chart-title">Time-Series & Fitted Theil-Sen Trend Line</span>
-              </div>
-              <div style="font-size:0.75rem; color:var(--accent-yellow);" id="chart-subtitle">
-                Rajshahi (2001 - 2025)
-              </div>
-            </div>
-            <div class="chart-wrapper">
-              <canvas id="trendChart"></canvas>
-            </div>
-          </div>
         </div>
 
         <!-- Bilingual Narration Agent Panel -->
@@ -297,9 +455,10 @@
         </div>
       </section>
 
+      <!-- =================================================================== -->
       <!-- TAB 2: ML Forecasting Component (Section 6.3 & 10) -->
+      <!-- =================================================================== -->
       <section id="tab-forecast" class="tab-pane" style="display:none;">
-        <!-- Feature Header Banner (2-3 Sentences Detail) -->
         <div class="feature-banner">
           <span class="feature-banner-badge" id="banner-forecast-badge">Machine Learning Projection</span>
           <h2 class="feature-banner-title" id="banner-forecast-title">ML Forecasting Component (Section 6.3)</h2>
@@ -312,7 +471,7 @@
           <div class="panel-header">
             <div class="panel-title">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-              <span id="txt-fc-panel-title">Model Validation & Trajectory Projection</span>
+              <span id="txt-fc-panel-title">Model Validation &amp; Trajectory Projection</span>
             </div>
             <div style="display:flex; align-items:center; gap:0.75rem;">
               <label style="margin:0; font-size:0.8rem;" id="txt-label-horizon">Horizon:</label>
@@ -360,70 +519,100 @@
 
           <!-- Scientific Caveat / Disclaimer -->
           <div style="margin-top:1rem; background:var(--yellow-glow-subtle); border:1px solid var(--accent-yellow); padding:0.85rem; border-radius:var(--radius-sm); font-size:0.82rem; color:var(--text-main);" id="txt-fc-disclaimer">
-            <strong>Mandatory Scientific Caveat (Section 6.3 & 10):</strong> Machine learning forecasts estimate possible future trajectory ranges from historical patterns under stationarity assumptions. Predictions are shown alongside empirical 95% prediction intervals and validation metrics, and must never be interpreted as certainty, causal attribution, or emergency risk warnings.
+            <strong>Mandatory Scientific Caveat (Section 6.3 &amp; 10):</strong> Machine learning forecasts estimate possible future trajectory ranges from historical patterns under stationarity assumptions. Predictions are shown alongside empirical 95% prediction intervals and validation metrics, and must never be interpreted as certainty, causal attribution, or emergency risk warnings.
           </div>
         </div>
       </section>
 
-      <!-- TAB 3: Two-District Comparison & Mirror Finder -->
+      <!-- =================================================================== -->
+      <!-- TAB 3: Environmental Dashboard: Dual Comparison & Dynamic Window (Image 3) -->
+      <!-- =================================================================== -->
       <section id="tab-compare" class="tab-pane" style="display:none;">
-        <!-- Feature Header Banner (2-3 Sentences Detail) -->
         <div class="feature-banner">
-          <span class="feature-banner-badge" id="banner-compare-badge">Comparative Climatology</span>
-          <h2 class="feature-banner-title" id="banner-compare-title">Two-District Comparison & Mirror Finder</h2>
+          <span class="feature-banner-badge" id="banner-compare-badge">Environmental Dashboard</span>
+          <h2 class="feature-banner-title" id="banner-compare-title">Examine How Conclusions Change Over Time</h2>
           <p class="feature-banner-desc" id="banner-compare-desc">
-            Dual-district comparative analysis tool designed to contrast historical trajectories across contrasting micro-climates. The integrated Mirror Finder scans all 64 districts to discover the region exhibiting the highest divergence or opposite trend. Enables rapid identification of regional climate shifts, from dry western bars to coastal monsoon zones.
+            Dual comparative analysis contrasting environmental trajectories across contrasting micro-climates. Use the interactive time slider below to observe how statistical conclusions, slope magnitude, and trend directions evolve as the evaluated historical time window shifts.
           </p>
         </div>
 
-        <div class="comparison-grid">
-          <div class="delta-banner">
-            <div class="delta-icon">⚖️</div>
-            <div class="delta-text" style="flex:1;">
-              <h3 id="compare-banner-title">Comparing District Trends</h3>
-              <p id="compare-banner-summary">Select two districts below or use the Mirror Finder to discover opposite trends across Bangladesh.</p>
-            </div>
-            <button class="btn-primary" id="mirror-finder-btn" style="width:auto; padding:0.5rem 1rem; font-size:0.82rem; display:flex; align-items:center; gap:0.4rem;">
-              <span>🔍</span> <span id="txt-btn-mirror">Run Mirror Finder</span>
-            </button>
+        <!-- Top Delta Banner -->
+        <div class="delta-banner">
+          <div class="delta-icon">⚖️</div>
+          <div class="delta-text" style="flex:1;">
+            <h3 id="compare-banner-title">Comparing District Trends</h3>
+            <p id="compare-banner-summary">Select two districts below or use the Mirror Finder to discover opposite trends across Bangladesh.</p>
           </div>
+          <button class="btn-primary" id="mirror-finder-btn" style="width:auto; padding:0.5rem 1rem; font-size:0.82rem; display:flex; align-items:center; gap:0.4rem;">
+            <span>🔍</span> <span id="txt-btn-mirror">Run Mirror Finder</span>
+          </button>
+        </div>
 
+        <!-- Side-by-Side Dual Comparison (Matching Image 3) -->
+        <div class="dual-dashboard-grid">
+          
+          <!-- Left Chart: District 1 / Baseline -->
           <div class="panel-card">
             <div class="panel-header">
-              <div class="panel-title" id="txt-compare-d1-title">District 1</div>
+              <div class="panel-title">
+                <span id="txt-compare-d1-title">District 1 (Baseline)</span>
+              </div>
               <select id="compare-d1-select" style="width: auto;"></select>
             </div>
             <div class="stat-card" style="margin-top:0.5rem;">
-              <div class="stat-label" id="txt-d1-trend-label">Trend & Slope</div>
+              <div class="stat-label" id="txt-d1-trend-label">Theil-Sen Slope</div>
               <div class="stat-value" id="comp-d1-slope">...</div>
               <div class="stat-sub" id="comp-d1-sub">...</div>
             </div>
+            <div class="chart-wrapper" style="height:280px; margin-top:0.75rem;">
+              <canvas id="compareD1Chart"></canvas>
+            </div>
           </div>
 
+          <!-- Right Chart: District 2 / Extended with Dynamic Window Slider (Image 3) -->
           <div class="panel-card">
             <div class="panel-header">
-              <div class="panel-title" id="txt-compare-d2-title">District 2</div>
+              <div class="panel-title">
+                <span id="txt-compare-d2-title">District 2 (Comparison)</span>
+              </div>
               <select id="compare-d2-select" style="width: auto;"></select>
             </div>
             <div class="stat-card" style="margin-top:0.5rem;">
-              <div class="stat-label" id="txt-d2-trend-label">Trend & Slope</div>
+              <div class="stat-label" id="txt-d2-trend-label">Theil-Sen Slope</div>
               <div class="stat-value" id="comp-d2-slope">...</div>
               <div class="stat-sub" id="comp-d2-sub">...</div>
             </div>
+            <div class="chart-wrapper" style="height:280px; margin-top:0.75rem;">
+              <canvas id="compareD2Chart"></canvas>
+            </div>
+
+            <!-- "Examine how conclusions change over time" Interactive Slider (Image 3) -->
+            <div class="conclusion-slider-box">
+              <div class="cs-header">
+                <span class="cs-title">Historical Time Window:</span>
+                <span class="cs-val" id="conclusion-window-label">2001 – 2025 (Full 25-Year)</span>
+              </div>
+              <input type="range" id="conclusion-time-slider" min="2005" max="2025" value="2025" step="1">
+              <div class="cs-footer-text">
+                <em>* Drag slider to examine how conclusions and slopes change over time</em>
+              </div>
+            </div>
           </div>
 
-          <div class="panel-card" style="grid-column: 1 / -1;">
-            <div class="panel-header">
-              <div class="panel-title" id="txt-compare-chart-title">Dual District Comparison Chart</div>
-            </div>
-            <div class="chart-wrapper">
-              <canvas id="compareChart"></canvas>
-            </div>
+        </div>
+
+        <!-- Combined Comparison Chart -->
+        <div class="panel-card" style="margin-top:1.25rem;">
+          <div class="panel-header">
+            <div class="panel-title" id="txt-compare-chart-title">Overlay Comparison Chart</div>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="compareChart"></canvas>
           </div>
         </div>
 
         <!-- Shared Climatological Driver Scientific Card (Section 6.5 & 11) -->
-        <div id="shared-driver-card" class="shared-driver-card" style="display:none;">
+        <div id="shared-driver-card" class="shared-driver-card" style="display:none; margin-top:1.25rem;">
           <div class="shared-driver-header">
             <div>
               <span class="shared-driver-badge" id="driver-badge">Scientific Driver</span>
@@ -440,7 +629,7 @@
         </div>
 
         <!-- Top 5 Strongest Mirror Pairs Leaderboard -->
-        <div class="mirror-leaderboard-card">
+        <div class="mirror-leaderboard-card" style="margin-top:1.25rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
             <div>
               <h3 style="font-size:0.95rem; font-weight:700; color:var(--text-main);" id="txt-leaderboard-title">Top 5 Strongest Mirror Pairs in Bangladesh</h3>
@@ -469,9 +658,10 @@
         </div>
       </section>
 
+      <!-- =================================================================== -->
       <!-- TAB 4: Gridded Zarr Explorer -->
+      <!-- =================================================================== -->
       <section id="tab-gridded" class="tab-pane" style="display:none;">
-        <!-- Feature Header Banner (2-3 Sentences Detail) -->
         <div class="feature-banner">
           <span class="feature-banner-badge" id="banner-gridded-badge">Earth Observation Canvas</span>
           <h2 class="feature-banner-title" id="banner-gridded-title">Gridded Zarr Explorer (MODIS / IMERG / GRACE)</h2>
@@ -581,12 +771,13 @@
         </div>
       </section>
 
+      <!-- =================================================================== -->
       <!-- TAB 5: Methods & Provenance Documentation -->
+      <!-- =================================================================== -->
       <section id="tab-methods" class="tab-pane" style="display:none;">
-        <!-- Feature Header Banner (2-3 Sentences Detail) -->
         <div class="feature-banner">
           <span class="feature-banner-badge" id="banner-methods-badge">Scientific Provenance</span>
-          <h2 class="feature-banner-title" id="banner-methods-title">Methodology & Scientific Integrity</h2>
+          <h2 class="feature-banner-title" id="banner-methods-title">Methodology &amp; Scientific Integrity</h2>
           <p class="feature-banner-desc" id="banner-methods-desc">
             Complete scientific transparency and provenance documentation for all datasets and computational algorithms. Implements exact rank-based non-parametric statistics without reliance on language model calculations or stochastic heuristics. Every displayed metric traces back directly to authoritative NASA satellite missions and peer-reviewed methodologies.
           </p>
@@ -601,9 +792,9 @@
             <li><strong style="color:var(--text-main);">Benjamini-Hochberg (FDR):</strong> Multi-region false discovery rate correction controlling false positive rates across all 64 districts.</li>
           </ul>
 
-          <h3 style="color:var(--accent-yellow); margin-top:0.5rem;" id="txt-methods-sec2-title">2. NASA Datasets & Provenance</h3>
+          <h3 style="color:var(--accent-yellow); margin-top:0.5rem;" id="txt-methods-sec2-title">2. NASA Datasets &amp; Provenance</h3>
           <ul style="padding-left:1.5rem; color:var(--text-muted); font-size:0.88rem;">
-            <li><strong style="color:var(--text-main);">NASA POWER:</strong> Daily meteorology (MERRA-2 assimilation & GEOS/CERES radiation) for all 64 district centroids.</li>
+            <li><strong style="color:var(--text-main);">NASA POWER:</strong> Daily meteorology (MERRA-2 assimilation &amp; GEOS/CERES radiation) for all 64 district centroids.</li>
             <li><strong style="color:var(--text-main);">NASA MODIS (MOD13Q1):</strong> Gridded Normalized Difference Vegetation Index (NDVI) tracking greenness and cropping cycles.</li>
             <li><strong style="color:var(--text-main);">NASA GPM IMERG:</strong> Gridded satellite precipitation data capturing monsoon variability.</li>
             <li><strong style="color:var(--text-main);">NASA JPL GRACE/GRACE-FO:</strong> Mascon RL06 terrestrial water storage anomalies tracking groundwater depletion.</li>
@@ -619,11 +810,147 @@
     </main>
   </div>
 
+  <!-- =================================================================== -->
+  <!-- MODAL: Trend Estimates Deep-Dive Inspector (Matching Image 2) -->
+  <!-- =================================================================== -->
+  <div class="modal-backdrop" id="trend-estimates-modal" style="display:none;">
+    <div class="modal-container-lg">
+      
+      <!-- Modal Header -->
+      <div class="modal-header-bar">
+        <div class="mhb-left">
+          <h2 class="modal-title" id="txt-modal-trend-title">Trend estimates</h2>
+          <div class="modal-search-box">
+            <label for="modal-district-select" style="font-size:0.75rem; color:var(--text-muted);">Search:</label>
+            <select id="modal-district-select">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div class="mhb-meta-chip">
+            <span class="mmc-label">Present Files:</span>
+            <span class="mmc-val" id="modal-obs-count">9,131 Obs</span>
+          </div>
+          <div class="mhb-meta-chip highlight">
+            <span class="mmc-label">Selected:</span>
+            <span class="mmc-val" id="modal-selected-district">Sylhet</span>
+          </div>
+        </div>
+
+        <div class="mhb-right">
+          <div style="display:flex; align-items:center; gap:0.4rem;">
+            <label style="font-size:0.75rem; color:var(--text-muted);">Scale:</label>
+            <select id="modal-scale-select" style="width:110px; font-size:0.75rem; padding:0.25rem 0.5rem;">
+              <option value="daily" selected>Daily Points</option>
+              <option value="monthly">Monthly Means</option>
+            </select>
+          </div>
+          <button class="btn-tool-sm" id="modal-export-btn" title="Export this district's trend">📥 Export</button>
+          <button class="btn-modal-close" id="close-trend-modal-btn" title="Close Modal">&times;</button>
+        </div>
+      </div>
+
+      <!-- Modal Body (Dual Column Layout: Chart + Scorecard) -->
+      <div class="modal-body-grid">
+        
+        <!-- Left: High-Resolution Trend Chart (Image 2) -->
+        <div class="modal-chart-col">
+          <div class="chart-wrapper" style="height:380px;">
+            <canvas id="modalTrendChart"></canvas>
+          </div>
+          <div class="chart-milestone-bar" id="modal-milestone-text">
+            Baseline (2001–2005): 25.1°C &rarr; Recent (2021–2025): 25.8°C | Net Shift: +0.76°C (+3.1%)
+          </div>
+        </div>
+
+        <!-- Right: Exact Metrics Scorecard (Image 2) -->
+        <div class="modal-metrics-col">
+          
+          <!-- Trend Estimate Block -->
+          <div class="mmc-card">
+            <div class="mmc-card-header">
+              <span class="mmc-card-title">Trend estimate</span>
+              <span class="help-tooltip" title="Non-parametric Theil-Sen median rate of annual change">❓</span>
+            </div>
+            <div class="mmc-card-row">
+              <div>
+                <div class="mmc-sub">Definitive estimate</div>
+                <div class="mmc-strong-val" id="modal-stat-district">Sylhet</div>
+              </div>
+              <div style="text-align:right;">
+                <div class="mmc-sub">Statistical estimate rate</div>
+                <div class="mmc-strong-val highlight" id="modal-stat-slope">+0.7335</div>
+                <div style="font-size:0.7rem; color:var(--text-muted);" id="modal-stat-slope-units">mm / year</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Statistical Significance Block (Checkmark in Image 2) -->
+          <div class="mmc-card">
+            <div class="mmc-card-header">
+              <span class="mmc-card-title">Statistical significance</span>
+              <span class="help-tooltip" title="Mann-Kendall non-parametric monotonic trend test (alpha = 0.05)">❓</span>
+            </div>
+            <div class="mmc-sig-row">
+              <div>
+                <div class="mmc-sub">Total test rate (Z-score)</div>
+                <div class="mmc-med-val" id="modal-stat-z">Z = 3.61</div>
+              </div>
+              <div class="sig-check-badge" id="modal-sig-badge">
+                <span class="check-icon">✓</span>
+                <span id="modal-sig-text">Significant (p &lt; 0.05)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Observation Coverage Block (Image 2) -->
+          <div class="mmc-card">
+            <div class="mmc-card-header">
+              <span class="mmc-card-title">Observation-coverage</span>
+              <span class="help-tooltip" title="Satellite & sensor data completeness and quality assurance">❓</span>
+            </div>
+            <div class="coverage-metrics-list">
+              <div class="cml-row">
+                <span>p-value:</span>
+                <strong id="modal-cov-pval">0.04532</strong>
+              </div>
+              <div class="cml-row">
+                <span>95% Confidence Interval:</span>
+                <strong id="modal-cov-ci">[0.014, 0.048]</strong>
+              </div>
+              <div class="cml-row">
+                <span>Record completeness:</span>
+                <strong style="color:var(--accent-yellow);">100% (9,131 Obs)</strong>
+              </div>
+              <div class="cml-row">
+                <span>Quality assurance:</span>
+                <strong style="color:#22c55e;">PASSED (0 missing)</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Plain-Language Bilingual Narration Summary -->
+          <div class="mmc-card" style="background:var(--yellow-glow-subtle); border-color:var(--accent-yellow);">
+            <div class="mmc-card-header">
+              <span class="mmc-card-title" style="color:var(--accent-yellow);">Verified Plain-Language Summary</span>
+              <span class="verify-badge-sm">✓ Verified</span>
+            </div>
+            <p id="modal-narration-text" style="font-size:0.78rem; line-height:1.5; color:var(--text-main); margin-top:4px;">
+              Loading verified summary...
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
   <!-- Provenance Sliding Drawer -->
   <div class="drawer-backdrop" id="drawer-backdrop"></div>
   <aside class="provenance-drawer" id="provenance-drawer">
     <div class="drawer-header">
-      <h2 id="txt-drawer-title">Scientific Provenance & Raw JSON</h2>
+      <h2 id="txt-drawer-title">Scientific Provenance &amp; Raw JSON</h2>
       <button class="btn-close" id="close-drawer-btn">&times;</button>
     </div>
     <div class="drawer-body">
@@ -658,6 +985,7 @@
     </div>
   </aside>
 
+  <!-- Application Logic -->
   <script src="/static/app.js"></script>
 </body>
 </html>
