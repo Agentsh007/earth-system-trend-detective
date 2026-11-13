@@ -192,6 +192,18 @@ const TRANSLATIONS = {
     provJsonTitle: "Exact Tool Result JSON",
     btnCopyJson: "Copy JSON",
     btnCopied: "Copied!",
+    // Simple Summaries (English)
+    simpleSumSingleTitle: "Simple Summary: What is this showing?",
+    simpleSumSingleText: "Is the climate actually getting hotter or rainier over the last 25 years, or is it just normal random weather? Instead of being fooled by a single extreme heatwave or sudden flood, EarthScope computes the true annual speed of change using the Theil–Sen estimator. The Mann–Kendall test verifies if there is >95% scientific certainty that the trend is real and not accidental noise.",
+    simpleSumFcTitle: "Simple Summary: How does this forecast work?",
+    simpleSumFcText: "Where are local environmental conditions likely heading over the next 1 to 5 years? Our AI model learns from 25 years of recurring monthly cycles and long-term historical shifts. The model is rigorously tested against real past observations to prove it beats simple persistence guessing. The shaded band shows the expected 95% likely boundary range for future years.",
+    simpleSumCompTitle: "Simple Summary: Why does the time window matter?",
+    simpleSumCompText: "If you only look at a short 5 or 10-year period, normal climate fluctuations can look like dramatic warming or cooling. Drag the Historical Time Window slider below to watch live how short-term conclusions evolve when placed in the full 25-year context! The Mirror Finder button discovers two regions with opposite environmental behaviors (such as dry Barind drawdown versus coastal Haor water saturation).",
+    simpleSumGridTitle: "Simple Summary: Satellite View in Motion",
+    simpleSumGridText: "Watch 25 years of changing satellite views across Bangladesh! Press Play to see seasonal monsoon rains sweep in, crops green and harvest across the year, or deep underground water change over decades. Move your mouse or tap any point to inspect numbers, or click any spot to inspect its exact 25-year graph below.",
+    simpleSumMethodsTitle: "Simple Summary: Scientific Trust & Open Evidence",
+    simpleSumMethodsText: "How can you trust these findings? Every number shown on EarthScope comes from official NASA satellite missions. We use proven mathematical formulas that cannot be fooled by extreme weather spikes. You can click on any scientific term below to read its international scientific definition, or download the full raw data and calculations for independent review.",
+    modalTrendTitle: "Trend estimates",
   },
   bn: {
     appTitle: "আর্থস্কোপ",
@@ -315,6 +327,18 @@ const TRANSLATIONS = {
     provJsonTitle: "টুল ফলাফলের মূল JSON",
     btnCopyJson: "JSON কপি করুন",
     btnCopied: "কপি সম্পন্ন!",
+    // Simple Summaries (Bangla)
+    simpleSumSingleTitle: "সহজ ভাষায় মূল কথা: এখানে কী দেখানো হচ্ছে?",
+    simpleSumSingleText: "গত ২৫ বছরে বাংলাদেশের আবহাওয়া কি সত্যিই বেশি গরম বা অতিরিক্ত বৃষ্টিপ্রবণ হচ্ছে, নাকি এটি সাধারণ আবহাওয়া পরিবর্তন? কোনো একটি অস্বাভাবিক গরমের দিন বা সাময়িক বন্যায় বিভ্রান্ত না হয়ে, আর্থস্কোপ থেইল-সেন পদ্ধতির মাধ্যমে প্রতি বছরের পরিবর্তনের প্রকৃত গতি বের করে। মান-কেন্ডাল পরীক্ষার মাধ্যমে নিশ্চিত করা হয় যে এই পরিবর্তনটি কাকতালীয় নয়, বরং ৯৫% এর বেশি বৈজ্ঞানিক নিশ্চয়তাসম্পন্ন বাস্তব প্রমাণ।",
+    simpleSumFcTitle: "সহজ ভাষায় মূল কথা: এই পূর্বাভাস কীভাবে কাজ করে?",
+    simpleSumFcText: "আগামী ১ থেকে ৫ বছরে পরিবেশের গতিপ্রকৃতি কেমন হতে পারে? আমাদের কৃত্রিম বুদ্ধিমত্তা মডেল বিগত ২৫ বছরের মাসিক চক্র ও দীর্ঘমেয়াদি পরিবর্তন পর্যবেক্ষণ করে এই সম্ভাবনা নির্ণয় করে। অতীত তথ্যের বিপরীতে পরীক্ষা করে মডেলটির নির্ভুলতা প্রমাণিত। চার্টের ছায়াযুক্ত অংশটি ৯৫% সম্ভাব্য সীমানা নির্দেশ করে।",
+    simpleSumCompTitle: "সহজ ভাষায় মূল কথা: সময়সীমা কেন এত গুরুত্বপূর্ণ?",
+    simpleSumCompText: "আপনি যদি মাত্র ৫ বা ১০ বছরের উপাত্ত দেখেন, তবে সাময়িক কোনো তীব্র গরমকে বড় পরিবর্তন বলে মনে হতে পারে। নিচের টাইম স্লাইডারটি টেনে নিজে পরীক্ষা করে দেখুন ২৫ বছরের পূর্ণাঙ্গ উপাত্তে কীভাবে স্বল্পমেয়াদি সিদ্ধান্ত পরিবর্তিত হয়ে যায়! মিরর ফাইন্ডার বোতামে ক্লিক করে সম্পূর্ণ বিপরীতমুখী দুটি জেলার (যেমন বরেন্দ্র অঞ্চলের খরা বনাম হাওরের আর্দ্রতা) আচরণ পাশাপাশি তুলনা করতে পারেন।",
+    simpleSumGridTitle: "সহজ ভাষায় মূল কথা: মহাকাশ থেকে চলন্ত স্যাটেলাইট দৃশ্য",
+    simpleSumGridText: "মহাকাশ থেকে সরাসরি দেখুন গত ২৫ বছরে বাংলাদেশের ঋতু পরিবর্তন! 'প্লে' বোতাম চাপলে বর্ষার মেঘবৃষ্টির বিস্তার, ফসলি মাঠের সবুজায়ন এবং মাটির নিচের পানির পরিবর্তন অ্যানিমেশন আকারে ভেসে উঠবে। যে কোনো গ্রিডে মাউস রাখলে তাৎক্ষণিক মান দেখা যাবে এবং ক্লিক করলে নিচে তার ২৫ বছরের সম্পূর্ণ চার্ট দেখতে পাবেন।",
+    simpleSumMethodsTitle: "সহজ ভাষায় মূল কথা: বৈজ্ঞানিক বিশ্বস্ততা ও উন্মুক্ত তথ্য",
+    simpleSumMethodsText: "এই ফলাফল কেন শতভাগ নির্ভরযোগ্য? আর্থস্কোপের প্রতিটি সংখ্যা নাসার অনুমোদিত স্যাটেলাইট মিশন থেকে সংগৃহীত। কোনো এআই মডেলের অনুমানভিত্তিক হিসাব ছাড়াই সরাসরি স্বীকৃত গাণিতিক সূত্রের মাধ্যমে এগুলো পরিমাপ করা হয়। যেকোনো বৈজ্ঞানিক শব্দের ওপর ক্লিক করে তার আন্তর্জাতিক বৈজ্ঞানিক সংজ্ঞা পড়তে পারবেন অথবা স্বাধীন যাচাইয়ের জন্য মূল তথ্য ডাউনলোড করতে পারেন।",
+    modalTrendTitle: "ট্রেন্ড প্রাক্কলন (গভীর পর্যালোচনা)",
   }
 };
 
@@ -538,6 +562,27 @@ function setLanguage(lang) {
   setTxt("th-prov-region", t.provThRegion);
   setTxt("txt-raw-json-title", t.provJsonTitle);
   setTxt("copy-json-btn", t.btnCopyJson);
+
+  // Simple Summaries (Bilingual)
+  setTxt("simple-sum-single-title", t.simpleSumSingleTitle);
+  setTitleHtml("simple-sum-single-text", t.simpleSumSingleText);
+  setTxt("simple-sum-fc-title", t.simpleSumFcTitle);
+  setTitleHtml("simple-sum-fc-text", t.simpleSumFcText);
+  setTxt("simple-sum-comp-title", t.simpleSumCompTitle);
+  setTitleHtml("simple-sum-comp-text", t.simpleSumCompText);
+  setTxt("simple-sum-grid-title", t.simpleSumGridTitle);
+  setTitleHtml("simple-sum-grid-text", t.simpleSumGridText);
+  setTxt("simple-sum-methods-title", t.simpleSumMethodsTitle);
+  setTitleHtml("simple-sum-methods-text", t.simpleSumMethodsText);
+
+  // Search input placeholder
+  const searchInput = document.getElementById("header-district-search");
+  if (searchInput) {
+    searchInput.placeholder = lang === "bn" ? "৬৪টি জেলা খুঁজুন (যেমন সিলেট, রাজশাহী, ঢাকা)..." : "Search 64 districts (e.g. Sylhet, Rajshahi, Dhaka)...";
+  }
+
+  // Modal Title
+  setTxt("txt-modal-trend-title", t.modalTrendTitle || "Trend estimates");
 }
 
 // Dynamic Chart Theming Colors
@@ -712,14 +757,55 @@ async function loadDistricts() {
 
 // Event Listeners for UI Controls
 function initEventListeners() {
-  // Sidebar Collapse Hamburger (Image 1)
+  // Sidebar Toggle Hamburger (Desktop & Mobile)
   const toggleSidebarBtn = document.getElementById("btn-toggle-sidebar");
+  const sidebarBackdrop = document.getElementById("sidebar-backdrop");
+  const appSidebar = document.getElementById("app-sidebar");
+  const mainAppContainer = document.getElementById("main-app-container");
+
+  const closeMobileSidebar = () => {
+    if (appSidebar) appSidebar.classList.remove("sidebar-open");
+    if (sidebarBackdrop) sidebarBackdrop.classList.remove("active");
+  };
+
   if (toggleSidebarBtn) {
     toggleSidebarBtn.addEventListener("click", () => {
-      document.getElementById("main-app-container").classList.toggle("sidebar-collapsed");
+      if (window.innerWidth <= 992) {
+        if (appSidebar) {
+          const isOpen = appSidebar.classList.toggle("sidebar-open");
+          if (sidebarBackdrop) sidebarBackdrop.classList.toggle("active", isOpen);
+        }
+      } else {
+        if (mainAppContainer) {
+          mainAppContainer.classList.toggle("sidebar-collapsed");
+        }
+      }
       setTimeout(() => { if (mapInstance) mapInstance.invalidateSize(); }, 350);
     });
   }
+
+  if (sidebarBackdrop) {
+    sidebarBackdrop.addEventListener("click", closeMobileSidebar);
+  }
+
+  // Window Resize Responsiveness
+  let resizeTimer = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (mapInstance) mapInstance.invalidateSize();
+      if (dockSparklineInstance) dockSparklineInstance.resize();
+      if (modalTrendChartInstance) modalTrendChartInstance.resize();
+      if (compareD1ChartInstance) compareD1ChartInstance.resize();
+      if (compareD2ChartInstance) compareD2ChartInstance.resize();
+      if (compareChartInstance) compareChartInstance.resize();
+      if (forecastChartInstance) forecastChartInstance.resize();
+      if (zarrPixelChartInstance) zarrPixelChartInstance.resize();
+      if (window.innerWidth > 992) {
+        closeMobileSidebar();
+      }
+    }, 150);
+  });
 
   // Sidebar Subtabs: Filters / Layers (Image 1)
   const btnSubFilters = document.getElementById("btn-subtab-filters");

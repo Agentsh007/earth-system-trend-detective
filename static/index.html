@@ -110,6 +110,7 @@
   </nav>
 
   <!-- Application Body Layout -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
   <div class="app-container" id="main-app-container">
 
     <!-- Left Collapsible Sidebar (Matching Image 1) -->
@@ -267,8 +268,19 @@
           <span class="feature-banner-badge" id="banner-single-badge">NASA Earth-Observation Evidence Platform</span>
           <h2 class="feature-banner-title" id="banner-single-title">EarthScope: Evidence People Can Trust</h2>
           <p class="feature-banner-desc" id="banner-single-desc">
-            Turning NASA Earth-observation data into evidence people can trust. Satellites and models give us plenty of data, but a rising line on a chart does not show whether a change is real, how large it is, or whether it differs from place to place. EarthScope lets users explore trends region by region across Bangladesh, estimating the rate of change with Sen’s slope and testing statistical significance with the Mann–Kendall test.
+            Turning NASA Earth-observation data into evidence people can trust. Satellites and models give us plenty of data, but a rising line on a chart does not show whether a change is real, how large it is, or whether it differs from place to place. EarthScope lets users explore trends region by region across Bangladesh, estimating the rate of change with <a href="https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator" target="_blank" rel="noopener noreferrer" class="sci-term-link">Sen’s slope ↗</a> and testing statistical significance with the <a href="https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient" target="_blank" rel="noopener noreferrer" class="sci-term-link">Mann–Kendall test ↗</a>.
           </p>
+        </div>
+
+        <!-- Simple Language Summary Callout (Pillar 2 & 4) -->
+        <div class="simple-summary-card">
+          <div class="simple-summary-icon">💡</div>
+          <div class="simple-summary-content">
+            <div class="simple-summary-title" id="simple-sum-single-title">Simple Summary: What is this showing?</div>
+            <div class="simple-summary-text" id="simple-sum-single-text">
+              Is the climate actually getting hotter or rainier over the last 25 years, or is it just normal random weather? Instead of being fooled by a single extreme heatwave or sudden flood, EarthScope computes the true annual speed of change using the <a href="https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator" target="_blank" rel="noopener noreferrer" class="sci-term-link">Theil–Sen estimator ↗</a>. The <a href="https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient" target="_blank" rel="noopener noreferrer" class="sci-term-link">Mann–Kendall test ↗</a> verifies if there is &gt;95% scientific certainty that the trend is real and not accidental noise.
+            </div>
+          </div>
         </div>
 
         <!-- GIS Spatial Explorer Layout: Map + Floating Time-Series Widget -->
@@ -370,17 +382,23 @@
         <!-- Top Stat Cards (Preserved for Instant Full Visibility) -->
         <div class="stats-grid" style="margin-top:1.5rem;">
           <div class="stat-card warm">
-            <div class="stat-label" id="txt-stat-slope-label">Theil-Sen Slope</div>
+            <div class="stat-label" id="txt-stat-slope-label">
+              <a href="https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator" target="_blank" rel="noopener noreferrer" class="sci-term-link">Theil-Sen Slope ↗</a>
+            </div>
             <div class="stat-value" id="stat-slope">+0.031</div>
             <div class="stat-sub" id="stat-slope-units">degC per year</div>
           </div>
           <div class="stat-card gold">
-            <div class="stat-label" id="txt-stat-ci-label">95% Confidence Interval</div>
+            <div class="stat-label" id="txt-stat-ci-label">
+              <a href="https://en.wikipedia.org/wiki/Confidence_interval" target="_blank" rel="noopener noreferrer" class="sci-term-link">95% Confidence Interval ↗</a>
+            </div>
             <div class="stat-value" id="stat-ci">[0.014, 0.048]</div>
             <div class="stat-sub" id="txt-stat-ci-sub">Rank-based exact bounds</div>
           </div>
           <div class="stat-card green">
-            <div class="stat-label" id="txt-stat-mk-label">Mann-Kendall Test</div>
+            <div class="stat-label" id="txt-stat-mk-label">
+              <a href="https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient" target="_blank" rel="noopener noreferrer" class="sci-term-link">Mann-Kendall Test ↗</a>
+            </div>
             <div class="stat-value" id="stat-mk">Z = 3.61</div>
             <div class="stat-sub" id="stat-p-val">p = 0.0003 (S = 41230)</div>
           </div>
@@ -412,21 +430,23 @@
           <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.75rem;" id="txt-sens-desc">
             Testing trend consistency across 10-year, 15-year, 20-year, and 25-year windows up to 2025 to verify whether change is persistent or cyclic.
           </p>
-          <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left;">
-            <thead>
-              <tr style="border-bottom:1px solid var(--border-color); color:var(--accent-yellow-bright);">
-                <th style="padding:4px 8px;" id="th-sens-window">Window</th>
-                <th style="padding:4px 8px;" id="th-sens-span">Span</th>
-                <th style="padding:4px 8px;" id="th-sens-slope">Theil-Sen Slope</th>
-                <th style="padding:4px 8px;" id="th-sens-ci">95% CI</th>
-                <th style="padding:4px 8px;" id="th-sens-pval">p-value</th>
-                <th style="padding:4px 8px;" id="th-sens-sig">Significant?</th>
-              </tr>
-            </thead>
-            <tbody id="sensitivity-tbody">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left;">
+              <thead>
+                <tr style="border-bottom:1px solid var(--border-color); color:var(--accent-yellow-bright);">
+                  <th style="padding:4px 8px;" id="th-sens-window">Window</th>
+                  <th style="padding:4px 8px;" id="th-sens-span">Span</th>
+                  <th style="padding:4px 8px;" id="th-sens-slope">Theil-Sen Slope</th>
+                  <th style="padding:4px 8px;" id="th-sens-ci">95% CI</th>
+                  <th style="padding:4px 8px;" id="th-sens-pval">p-value</th>
+                  <th style="padding:4px 8px;" id="th-sens-sig">Significant?</th>
+                </tr>
+              </thead>
+              <tbody id="sensitivity-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <!-- Bilingual Narration Agent Panel -->
@@ -463,8 +483,19 @@
           <span class="feature-banner-badge" id="banner-forecast-badge">Machine Learning Projection</span>
           <h2 class="feature-banner-title" id="banner-forecast-title">ML Forecasting Component (Section 6.3)</h2>
           <p class="feature-banner-desc" id="banner-forecast-desc">
-            Predictive forward-projection engine using Ridge regression with harmonic seasonality and autoregressive lag modeling. Validated against naive seasonal persistence benchmarks using a rigorous time-ordered 80/20 train/test split. Provides empirical 95% prediction intervals to visualize multi-year trajectory envelopes without claiming causal certainty.
+            Predictive forward-projection engine using <a href="https://en.wikipedia.org/wiki/Ridge_regression" target="_blank" rel="noopener noreferrer" class="sci-term-link">Ridge regression ↗</a> with harmonic seasonality and autoregressive lag modeling. Validated against naive seasonal persistence benchmarks using a rigorous time-ordered 80/20 train/test split. Provides empirical <a href="https://en.wikipedia.org/wiki/Prediction_interval" target="_blank" rel="noopener noreferrer" class="sci-term-link">95% prediction intervals ↗</a> to visualize multi-year trajectory envelopes without claiming causal certainty.
           </p>
+        </div>
+
+        <!-- Simple Language Summary Callout (Tab 2) -->
+        <div class="simple-summary-card">
+          <div class="simple-summary-icon">🔮</div>
+          <div class="simple-summary-content">
+            <div class="simple-summary-title" id="simple-sum-fc-title">Simple Summary: How does this forecast work?</div>
+            <div class="simple-summary-text" id="simple-sum-fc-text">
+              Where are local environmental conditions likely heading over the next 1 to 5 years? Our AI model learns from 25 years of recurring monthly cycles and long-term historical shifts. The model is rigorously tested against real past observations to prove it beats simple persistence guessing. The shaded band shows the expected 95% likely boundary range for future years.
+            </div>
+          </div>
         </div>
 
         <div class="panel-card" style="margin-bottom:1.25rem;">
@@ -532,8 +563,19 @@
           <span class="feature-banner-badge" id="banner-compare-badge">Environmental Dashboard</span>
           <h2 class="feature-banner-title" id="banner-compare-title">Examine How Conclusions Change Over Time</h2>
           <p class="feature-banner-desc" id="banner-compare-desc">
-            Dual comparative analysis contrasting environmental trajectories across contrasting micro-climates. Use the interactive time slider below to observe how statistical conclusions, slope magnitude, and trend directions evolve as the evaluated historical time window shifts.
+            Dual comparative analysis contrasting environmental trajectories across contrasting micro-climates. Use the interactive time slider below to observe how statistical conclusions, <a href="https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator" target="_blank" rel="noopener noreferrer" class="sci-term-link">Sen's slope ↗</a> magnitude, and <a href="https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient" target="_blank" rel="noopener noreferrer" class="sci-term-link">Mann-Kendall significance ↗</a> evolve as the evaluated historical time window shifts.
           </p>
+        </div>
+
+        <!-- Simple Language Summary Callout (Tab 3) -->
+        <div class="simple-summary-card">
+          <div class="simple-summary-icon">⚖️</div>
+          <div class="simple-summary-content">
+            <div class="simple-summary-title" id="simple-sum-comp-title">Simple Summary: Why does the time window matter?</div>
+            <div class="simple-summary-text" id="simple-sum-comp-text">
+              If you only look at a short 5 or 10-year period, normal climate fluctuations can look like dramatic warming or cooling. Drag the <strong>Historical Time Window slider</strong> below to watch live how short-term conclusions evolve when placed in the full 25-year context! The <strong>Mirror Finder</strong> button discovers two regions with opposite environmental behaviors (such as dry Barind drawdown versus coastal Haor water saturation).
+            </div>
+          </div>
         </div>
 
         <!-- Top Delta Banner -->
@@ -666,8 +708,19 @@
           <span class="feature-banner-badge" id="banner-gridded-badge">Earth Observation Canvas</span>
           <h2 class="feature-banner-title" id="banner-gridded-title">Gridded Zarr Explorer (MODIS / IMERG / GRACE)</h2>
           <p class="feature-banner-desc" id="banner-gridded-desc">
-            High-resolution 2D spatial canvas rendering gridded Earth observation data from pre-cached Zarr multidimensional stores. Explores 25 years of monthly MODIS NDVI vegetation greenness, GPM IMERG precipitation, and GRACE terrestrial water storage anomalies. Use the time slider to track seasonal monsoon flooding, vegetative vigor, and groundwater depletion across Bangladesh.
+            High-resolution 2D spatial canvas rendering gridded Earth observation data from pre-cached <a href="https://zarr.readthedocs.io/" target="_blank" rel="noopener noreferrer" class="sci-term-link">Zarr ↗</a> multidimensional stores. Explores 25 years of monthly <a href="https://modis.gsfc.nasa.gov/data/dataprod/mod13.php" target="_blank" rel="noopener noreferrer" class="sci-term-link">NASA MODIS NDVI ↗</a> vegetation greenness, <a href="https://gpm.nasa.gov/data/imerg" target="_blank" rel="noopener noreferrer" class="sci-term-link">NASA GPM IMERG ↗</a> precipitation, and <a href="https://grace.jpl.nasa.gov/data/get-data/jpl_global_mascons/" target="_blank" rel="noopener noreferrer" class="sci-term-link">NASA JPL GRACE Mascon ↗</a> terrestrial water storage anomalies.
           </p>
+        </div>
+
+        <!-- Simple Language Summary Callout (Tab 4) -->
+        <div class="simple-summary-card">
+          <div class="simple-summary-icon">🌐</div>
+          <div class="simple-summary-content">
+            <div class="simple-summary-title" id="simple-sum-grid-title">Simple Summary: Satellite View in Motion</div>
+            <div class="simple-summary-text" id="simple-sum-grid-text">
+              Watch 25 years of changing satellite views across Bangladesh! Press <strong>Play</strong> to see seasonal monsoon rains sweep in, crops green and harvest across the year, or deep underground water change over decades. Move your mouse or tap any point to inspect numbers, or click any spot to inspect its exact 25-year graph below.
+            </div>
+          </div>
         </div>
 
         <div class="panel-card">
@@ -783,21 +836,32 @@
           </p>
         </div>
 
+        <!-- Simple Language Summary Callout (Tab 5) -->
+        <div class="simple-summary-card">
+          <div class="simple-summary-icon">📜</div>
+          <div class="simple-summary-content">
+            <div class="simple-summary-title" id="simple-sum-methods-title">Simple Summary: Scientific Trust &amp; Open Evidence</div>
+            <div class="simple-summary-text" id="simple-sum-methods-text">
+              How can you trust these findings? Every number shown on EarthScope comes from official NASA satellite missions. We use proven mathematical formulas that cannot be fooled by extreme weather spikes. You can click on any scientific term below to read its international scientific definition, or download the full raw data and calculations for independent review.
+            </div>
+          </div>
+        </div>
+
         <div class="panel-card" style="gap:1rem; line-height:1.7;">
           <h2 style="font-size:1.2rem; color:var(--accent-yellow);" id="txt-methods-sec1-title">1. Non-Parametric Trend Statistics</h2>
           <ul style="padding-left:1.5rem; color:var(--text-muted); font-size:0.88rem;">
-            <li><strong style="color:var(--text-main);">Mann-Kendall Test:</strong> Evaluates monotonic directional change over time. Tie corrections in observation ranks are strictly applied to variance calculations.</li>
-            <li><strong style="color:var(--text-main);">Theil-Sen Slope:</strong> Median of all pairwise slopes, resistant to outliers (breakdown point &approx; 29.3%). Converted to annual rate of change (e.g. &deg;C/year).</li>
-            <li><strong style="color:var(--text-main);">95% Confidence Interval:</strong> Hollander-Wolfe / Gilbert rank-based order statistics corresponding to &alpha; = 0.05.</li>
-            <li><strong style="color:var(--text-main);">Benjamini-Hochberg (FDR):</strong> Multi-region false discovery rate correction controlling false positive rates across all 64 districts.</li>
+            <li><strong style="color:var(--text-main);"><a href="https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient" target="_blank" rel="noopener noreferrer" class="sci-term-link">Mann-Kendall Test ↗</a>:</strong> Evaluates monotonic directional change over time. Tie corrections in observation ranks are strictly applied to variance calculations.</li>
+            <li><strong style="color:var(--text-main);"><a href="https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator" target="_blank" rel="noopener noreferrer" class="sci-term-link">Theil-Sen Slope ↗</a>:</strong> Median of all pairwise slopes, resistant to outliers (breakdown point &approx; 29.3%). Converted to annual rate of change (e.g. &deg;C/year).</li>
+            <li><strong style="color:var(--text-main);"><a href="https://en.wikipedia.org/wiki/Confidence_interval" target="_blank" rel="noopener noreferrer" class="sci-term-link">95% Confidence Interval ↗</a>:</strong> Hollander-Wolfe / Gilbert rank-based order statistics corresponding to &alpha; = 0.05.</li>
+            <li><strong style="color:var(--text-main);"><a href="https://en.wikipedia.org/wiki/False_discovery_rate#Benjamini%E2%80%93Hochberg_procedure" target="_blank" rel="noopener noreferrer" class="sci-term-link">Benjamini-Hochberg (FDR) ↗</a>:</strong> Multi-region false discovery rate correction controlling false positive rates across all 64 districts.</li>
           </ul>
 
           <h3 style="color:var(--accent-yellow); margin-top:0.5rem;" id="txt-methods-sec2-title">2. NASA Datasets &amp; Provenance</h3>
           <ul style="padding-left:1.5rem; color:var(--text-muted); font-size:0.88rem;">
-            <li><strong style="color:var(--text-main);">NASA POWER:</strong> Daily meteorology (MERRA-2 assimilation &amp; GEOS/CERES radiation) for all 64 district centroids.</li>
-            <li><strong style="color:var(--text-main);">NASA MODIS (MOD13Q1):</strong> Gridded Normalized Difference Vegetation Index (NDVI) tracking greenness and cropping cycles.</li>
-            <li><strong style="color:var(--text-main);">NASA GPM IMERG:</strong> Gridded satellite precipitation data capturing monsoon variability.</li>
-            <li><strong style="color:var(--text-main);">NASA JPL GRACE/GRACE-FO:</strong> Mascon RL06 terrestrial water storage anomalies tracking groundwater depletion.</li>
+            <li><strong style="color:var(--text-main);"><a href="https://power.larc.nasa.gov/" target="_blank" rel="noopener noreferrer" class="sci-term-link">NASA POWER ↗</a>:</strong> Daily meteorology (<a href="https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/" target="_blank" rel="noopener noreferrer" class="sci-term-link">MERRA-2 ↗</a> assimilation &amp; GEOS/CERES radiation) for all 64 district centroids.</li>
+            <li><strong style="color:var(--text-main);"><a href="https://modis.gsfc.nasa.gov/" target="_blank" rel="noopener noreferrer" class="sci-term-link">NASA MODIS (MOD13Q1 / MOD11A2) ↗</a>:</strong> Gridded Normalized Difference Vegetation Index (NDVI) tracking greenness and cropping cycles.</li>
+            <li><strong style="color:var(--text-main);"><a href="https://gpm.nasa.gov/data/imerg" target="_blank" rel="noopener noreferrer" class="sci-term-link">NASA GPM IMERG ↗</a>:</strong> Gridded satellite precipitation data capturing monsoon variability.</li>
+            <li><strong style="color:var(--text-main);"><a href="https://grace.jpl.nasa.gov/" target="_blank" rel="noopener noreferrer" class="sci-term-link">NASA JPL GRACE/GRACE-FO ↗</a>:</strong> Mascon RL06 terrestrial water storage anomalies tracking groundwater depletion.</li>
           </ul>
 
           <h3 style="color:var(--accent-yellow); margin-top:0.5rem;" id="txt-methods-sec3-title">3. Responsible Scientific Interpretation</h3>
@@ -868,7 +932,9 @@
           <!-- Trend Estimate Block -->
           <div class="mmc-card">
             <div class="mmc-card-header">
-              <span class="mmc-card-title">Trend estimate</span>
+              <span class="mmc-card-title">
+                <a href="https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator" target="_blank" rel="noopener noreferrer" class="sci-term-link">Trend estimate ↗</a>
+              </span>
               <span class="help-tooltip" title="Non-parametric Theil-Sen median rate of annual change">❓</span>
             </div>
             <div class="mmc-card-row">
@@ -887,12 +953,14 @@
           <!-- Statistical Significance Block (Checkmark in Image 2) -->
           <div class="mmc-card">
             <div class="mmc-card-header">
-              <span class="mmc-card-title">Statistical significance</span>
+              <span class="mmc-card-title">
+                <a href="https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient" target="_blank" rel="noopener noreferrer" class="sci-term-link">Statistical significance ↗</a>
+              </span>
               <span class="help-tooltip" title="Mann-Kendall non-parametric monotonic trend test (alpha = 0.05)">❓</span>
             </div>
             <div class="mmc-sig-row">
               <div>
-                <div class="mmc-sub">Total test rate (Z-score)</div>
+                <div class="mmc-sub">Total test rate (<a href="https://en.wikipedia.org/wiki/Standard_score" target="_blank" rel="noopener noreferrer" class="sci-term-link" style="font-size:0.75rem;">Z-score ↗</a>)</div>
                 <div class="mmc-med-val" id="modal-stat-z">Z = 3.61</div>
               </div>
               <div class="sig-check-badge" id="modal-sig-badge">
@@ -910,11 +978,11 @@
             </div>
             <div class="coverage-metrics-list">
               <div class="cml-row">
-                <span>p-value:</span>
+                <span><a href="https://en.wikipedia.org/wiki/P-value" target="_blank" rel="noopener noreferrer" class="sci-term-link">p-value ↗</a>:</span>
                 <strong id="modal-cov-pval">0.04532</strong>
               </div>
               <div class="cml-row">
-                <span>95% Confidence Interval:</span>
+                <span><a href="https://en.wikipedia.org/wiki/Confidence_interval" target="_blank" rel="noopener noreferrer" class="sci-term-link">95% Confidence Interval ↗</a>:</span>
                 <strong id="modal-cov-ci">[0.014, 0.048]</strong>
               </div>
               <div class="cml-row">

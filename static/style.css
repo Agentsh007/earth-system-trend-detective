@@ -1678,22 +1678,329 @@ pre.raw-json-box {
   max-height: 380px;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1100px) {
-  .app-container {
-    grid-template-columns: 1fr;
-  }
-  .controls-sidebar {
-    border-right: none;
-    border-bottom: 1px solid var(--border-color);
-  }
+/* ==========================================================================
+   INTERACTIVE SCIENTIFIC LINKS & SIMPLE SUMMARY COMPONENTS
+   ========================================================================== */
+
+.sci-term-link {
+  color: var(--accent-yellow);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.sci-term-link:hover {
+  color: var(--accent-yellow-bright);
+  text-decoration-style: solid;
+  text-shadow: 0 0 6px var(--yellow-glow);
+}
+
+body.light-theme .sci-term-link {
+  color: #b45309;
+}
+
+body.light-theme .sci-term-link:hover {
+  color: #d97706;
+}
+
+.simple-summary-card {
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card-hover) 100%);
+  border-left: 4px solid var(--accent-yellow);
+  border-top: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.95rem 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.95rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.simple-summary-card:hover {
+  box-shadow: 0 6px 20px var(--yellow-glow-subtle);
+}
+
+.simple-summary-icon {
+  font-size: 1.45rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.simple-summary-content {
+  flex: 1;
+}
+
+.simple-summary-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent-yellow-bright);
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.simple-summary-text {
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--text-soft);
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0.5rem 0;
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(3px);
+  z-index: 1400;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-backdrop.active {
+  display: block;
+  opacity: 1;
+}
+
+/* ==========================================================================
+   COMPREHENSIVE RESPONSIVE DESIGN (Mobile, Tablet, Desktop, Ultra-Wide)
+   ========================================================================== */
+
+/* Large Desktop / Tablet Landscape (<= 1200px) */
+@media (max-width: 1200px) {
   .gis-explorer-grid {
     grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .gis-trend-dock {
+    max-width: 100%;
   }
   .dual-dashboard-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Tablet Portrait & Smaller (<= 992px) */
+@media (max-width: 992px) {
+  .app-container {
+    display: block;
+    position: relative;
+    width: 100%;
+  }
+
+  .controls-sidebar {
+    position: fixed;
+    top: 0;
+    left: -330px;
+    width: min(320px, 86vw);
+    height: 100vh;
+    z-index: 1500;
+    border-right: 1px solid var(--border-color);
+    box-shadow: 10px 0 35px rgba(0, 0, 0, 0.85);
+    background: var(--bg-secondary);
+    transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .controls-sidebar.sidebar-open {
+    left: 0;
+  }
+
+  .content-area {
+    padding: 1rem 0.9rem;
+    width: 100%;
+  }
+
+  #map-container {
+    height: clamp(340px, 50vh, 520px);
+  }
+
   .modal-body-grid {
     grid-template-columns: 1fr;
+  }
+
+  .modal-chart-col .chart-wrapper {
+    height: clamp(260px, 42vh, 340px);
+  }
+}
+
+/* Mobile Landscape & Large Phones (<= 850px) */
+@media (max-width: 850px) {
+  .header {
+    flex-wrap: wrap;
+    padding: 0.55rem 0.85rem;
+    gap: 0.6rem;
+  }
+
+  .header-left {
+    flex: 1;
+  }
+
+  .header-center {
+    order: 3;
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+
+  .header-search-wrapper {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .header-right {
+    gap: 0.45rem;
+  }
+
+  .nasa-spaceapps-badge {
+    padding: 3px 8px;
+    gap: 0.4rem;
+  }
+
+  .nav-tabs {
+    padding: 0.35rem 0.5rem;
+    gap: 0.35rem;
+  }
+
+  .tab-btn {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .modal-container-lg {
+    width: 95vw;
+    max-height: 94vh;
+    padding: 1rem;
+    margin: 2vh auto;
+  }
+}
+
+/* Mobile Phones (<= 600px) */
+@media (max-width: 600px) {
+  .brand-container h1 {
+    font-size: 1.1rem;
+  }
+
+  .breadcrumb-trail {
+    display: none;
+  }
+
+  .header-right .status-pill span:not(.dot) {
+    display: none;
+  }
+
+  .header-right .status-pill {
+    padding: 6px;
+    min-width: unset;
+  }
+
+  .nasa-spaceapps-badge .spaceapps-title-block {
+    display: none;
+  }
+
+  .nasa-spaceapps-badge {
+    padding: 4px;
+    background: transparent;
+    border: none;
+  }
+
+  .btn-tool, .btn-provenance {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.75rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .dock-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .modal-header-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+
+  .mhb-left {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .mhb-right {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .gis-map-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .map-toolbar-left, .map-toolbar-right {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .map-toolbar-right select {
+    flex: 1;
+    min-width: 130px;
+  }
+
+  .zarr-playback-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  .playback-btn {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
+    min-height: 38px;
+  }
+
+  .narration-bilingual-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .simple-summary-card {
+    padding: 0.8rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .simple-summary-title {
+    font-size: 0.84rem;
+  }
+
+  .simple-summary-text {
+    font-size: 0.8rem;
+  }
+
+  .provenance-drawer {
+    width: 100vw;
+    right: -100vw;
   }
 }
